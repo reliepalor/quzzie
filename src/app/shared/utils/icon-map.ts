@@ -1,5 +1,4 @@
-export const ICON_MAP: Record<string,string> = {
-
+﻿export const ICON_MAP: Record<string, string> = {
   computer: "💻",
   programming: "👨‍💻",
   science: "🔬",
@@ -9,6 +8,5 @@ export const ICON_MAP: Record<string,string> = {
   physics: "⚛️",
   biology: "🧬",
   chemistry: "🧪",
-  book: "📚"
-
+  book: "📚",
 };

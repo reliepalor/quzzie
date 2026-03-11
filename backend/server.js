@@ -223,11 +223,11 @@ import cors from "cors";
 
       // All failed — tell frontend to use icon/emoji/sticker shuffle
       console.log("⚠️ All image sources failed, using fallback");
-      return res.json({ type: "fallback", url: null });
+      return res.json({ type: "fallback", url: "assets/images/thinking.png" });
 
     } catch (error) {
       console.error("Image fetch error:", error.response?.data || error.message);
-      return res.json({ type: "fallback", url: null });
+      return res.json({ type: "fallback", url: "assets/images/thinking.png" });
     }
   });
 

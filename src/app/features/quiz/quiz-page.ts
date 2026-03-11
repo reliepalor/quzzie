@@ -5,7 +5,6 @@
   import { QuizService } from '../../shared/services/quiz.service';
   import { ConfettiComponent } from '../components/confetti';
   import { ICON_MAP } from '../../shared/utils/icon-map';
-import { from } from 'rxjs';
 
   @Component({
       standalone: true,
@@ -160,17 +159,19 @@ import { from } from 'rxjs';
         .subscribe({
           next: (res) => {
             this.imageLoading.set(false);
-            if (res.url) {
+            if (res?.url) {
               this.questionImage.set(res.url);
               this.emojiIcon.set(null);
-            } else {
-              this.emojiIcon.set(q.iconKeyword);
+              return;
             }
+
+            this.emojiIcon.set(q.iconKeyword);
+            this.pickFallbackDisplay();
           },
           error: () => {
             this.imageLoading.set(false);
             this.emojiIcon.set(q.iconKeyword);
-            
+            this.pickFallbackDisplay();
           }
         });
     }
@@ -196,10 +197,11 @@ import { from } from 'rxjs';
 
     iconDisplay = computed(() => {
       const key = this.emojiIcon();
+      if (!key) return null;
 
-      if(!key) return null;
+      const normalized = key.toLowerCase().trim();
+      const primary = normalized.split(/\s+/)[0];
 
-      return this.ICON_MAP[key] || null; 
+      return this.ICON_MAP[normalized] || this.ICON_MAP[primary] || '❓';
     })
   }
-

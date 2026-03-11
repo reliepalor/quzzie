@@ -31,16 +31,16 @@ export class ConfettiComponent implements AfterViewInit, OnDestroy {
     // Center burst slightly after
     const t1 = setTimeout(() => {
       this.fire(0.4, { spread: 120, origin: { x: 0.5, y: 0.4 } });
-    }, 250);
+    }, 5000);
 
     // Second wave from sides
     const t2 = setTimeout(() => {
       this.fire(0.2, { spread: 60, origin: { x: 0.2, y: 0.5 } });
       this.fire(0.2, { spread: 60, origin: { x: 0.8, y: 0.5 } });
-    }, 500);
+    }, 5000);
 
     // Slow drifting snow/particles for remaining time
-    const t3 = setTimeout(() => this.drift(), 700);
+    const t3 = setTimeout(() => this.drift(), 5000);
 
     this.timeouts.push(t1, t2, t3);
   }
@@ -67,7 +67,7 @@ export class ConfettiComponent implements AfterViewInit, OnDestroy {
 
   private drift() {
     let elapsed = 0;
-    const totalDuration = 2400;
+    const totalDuration = 4400;
 
     const frame = () => {
       if (elapsed >= totalDuration) return;
