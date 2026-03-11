@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, computed, ElementRef, ViewChild, HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; 
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
@@ -11,9 +11,13 @@ import { QuizService } from '../../shared/services/quiz.service';
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './page.html'
 })
+
+
+
 export class LandingPage {
   private quizService = inject(QuizService);
   private router = inject(Router);
+
   isLoading = signal(false);
   validationMessage = signal<string | null>(null);
 
@@ -29,6 +33,10 @@ export class LandingPage {
   showDifficultyModal = signal(false);
   difficultyMessage = signal<string | null>(null);
   pendingSettings = signal<QuizSettings | null>(null);
+
+  @ViewChild('dropdownRef') dropdownRef!: ElementRef;
+  
+  dropdownOpen = signal(false);
 
 
   quizForm = new FormGroup({
@@ -231,5 +239,31 @@ export class LandingPage {
     this.quizForm.patchValue({
       timer: totalSeconds
     })
+  }
+
+  //DROPDOWN BUTTON TIMER
+  toggleDropdown() {
+    this.dropdownOpen.update(v => !v);
+  }
+
+  selectPreset(seconds: number) {
+    this.quizForm.patchValue({ timer: seconds });
+    this.dropdownOpen.set(false);
+  }
+
+  isPresetActive = computed(() =>
+    this.timerPresets.some(p => p.seconds === this.quizForm.value.timer)
+  );
+
+  activePresetLabel = computed(() => {
+    const match = this.timerPresets.find(p => p.seconds === this.quizForm.value.timer);
+    return match ? match.label : 'Presets';
+  });
+
+  @HostListener('document:click', ['$event'])
+  onOutsideClick(event: MouseEvent) {
+    if (!this.dropdownRef?.nativeElement.contains(event.target)) {
+      this.dropdownOpen.set(false);
+    }
   }
 }

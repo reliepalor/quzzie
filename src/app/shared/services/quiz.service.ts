@@ -41,4 +41,10 @@ export class QuizService {
             subLevel
         });     
     }
+
+    getImage(query: string, subject: any) {
+        return this.http.get<any>
+        (    `http://localhost:3000/api/image?q=${encodeURIComponent(query)}&subject=${encodeURIComponent(subject)}`
+);
+    }
 }

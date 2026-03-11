@@ -5,143 +5,233 @@ import express from "express";
 import axios from "axios";
 import cors from "cors";
 
-const app = express();
+  const app = express();
+  const imageCache = new Map();
 
-app.use(cors());
-app.use(express.json());
+  app.use(cors());
+  app.use(express.json());
 
-app.post("/api/generate", async (req, res) => {
+  app.post("/api/generate", async (req, res) => {
 
-  const { topic, subject, testType, questionCount, level, subLevel } = req.body;
+    const { topic, subject, testType, questionCount, level, subLevel } = req.body;
+    const randomSeed = Math.floor(Math.random() * 100000);
 
-  const prompt = `
-You are an expert teacher.
+    const prompt = `
+      Random Seed: ${randomSeed}
+      You are a creative Student Teacher who are generating a
 
-Generate ${questionCount} ${testType} quiz questions.
+      Generate ${questionCount} ${testType} quiz questions.
 
-Topic: ${topic}
-Subject: ${subject}
-Level: ${level}
-Grade/Year: ${subLevel}
+      Topic: ${topic}
+      Subject: ${subject}
+      Level: ${level}
+      Grade/Year: ${subLevel}
 
-Adjust the difficulty so it is appropriate for the student's level.
+      Requirements:
+      - Each question must use a different scenario.
+      - Do NOT repeat the same story in different questions, try different thing that is align with the chosen subject/topic.
+      - Use different objects that is align with the level.
+      - Use simple words for Elementary level, and increase the the meaning if its highschool to College to Anyone.      
+      iconKeyword → simple object name
+      imageQuery → realistic image search phrase
 
-Return ONLY JSON:
+      Example:
 
-{
-  "quiz":[
-    {
-      "id":1,
-      "question":"",
-      "options":["","","",""],
-      "answer":"",
-      "explanation":""
+      {
+      "iconKeyword":"computer",
+      "imageQuery":"computer programming code screen"
+      }
+
+      Return ONLY JSON:
+
+      {
+        "quiz":[
+          {
+           "id":1,
+            "question":"",
+            "iconKeyword":"",
+            "imageQuery":"",
+            "options":["","","",""],
+            "answer":"",
+            "explanation":""
+          }
+        ]
+      }
+      `;
+
+    try {
+
+      console.log("Groq key loaded:", process.env.GROQ_API_KEY?.slice(0,10));
+
+      const response = await axios.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 1
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      const text = response.data.choices[0].message.content;
+
+      const cleaned = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      res.json(JSON.parse(cleaned));
+
+    } catch (error) {
+
+      console.error("Groq error:", error.response?.data || error.message);
+
+      res.status(500).json({
+        error: "AI generation failed",
+        details: error.response?.data || error.message
+      });
+
     }
-  ]
-}
-`;
 
-  try {
+  });
 
-    console.log("Groq key loaded:", process.env.GROQ_API_KEY?.slice(0,10));
+  app.post("/api/check-topic", async (req, res) => {
 
-    const response = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    const { topic, level, subLevel } = req.body;
 
-    const text = response.data.choices[0].message.content;
+    const prompt = `
+  You are an educational content safety checker.
 
-    const cleaned = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+  Analyze the topic for a quiz generator.
 
-    res.json(JSON.parse(cleaned));
+  Topic: "${topic}"
+  Level: "${level}"
+  Grade/Year: "${subLevel}"
 
-  } catch (error) {
+  Return ONLY JSON:
 
-    console.error("Groq error:", error.response?.data || error.message);
-
-    res.status(500).json({
-      error: "AI generation failed",
-      details: error.response?.data || error.message
-    });
-
+  {
+    "tooAdvanced": boolean,
+    "sensitive": boolean,
+    "reason": "short explanation"
   }
 
-});
+  Rules:
+  - tooAdvanced = true if topic is difficult for the grade level
+  - sensitive = true if topic involves sexual, explicit, violent, or adult material inappropriate for children
+  `;
 
-app.post("/api/check-topic", async (req, res) => {
+    try {
 
-  const { topic, level, subLevel } = req.body;
-
-  const prompt = `
-You are an educational content safety checker.
-
-Analyze the topic for a quiz generator.
-
-Topic: "${topic}"
-Level: "${level}"
-Grade/Year: "${subLevel}"
-
-Return ONLY JSON:
-
-{
-  "tooAdvanced": boolean,
-  "sensitive": boolean,
-  "reason": "short explanation"
-}
-
-Rules:
-- tooAdvanced = true if topic is difficult for the grade level
-- sensitive = true if topic involves sexual, explicit, violent, or adult material inappropriate for children
-`;
-
-  try {
-
-    const response = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json"
+      const response = await axios.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+            "Content-Type": "application/json"
+          }
         }
+      );
+
+      const text = response.data.choices[0].message.content;
+      const cleaned = text.replace(/```json|```/g, "").trim();
+
+      res.json(JSON.parse(cleaned));
+
+    } catch (error) {
+
+      console.error("Topic check error:", error.response?.data || error.message);
+
+      res.status(500).json({
+        error: "Topic analysis failed"
+      });
+
+    }
+
+  });
+
+  app.get("/api/image", async (req, res) => {
+    try {
+      let query = req.query.q;
+      const subject = req.query.subject || '';
+
+      if (!query) {
+        return res.status(400).json({ error: "Missing query" });
       }
-    );
 
-    const text = response.data.choices[0].message.content;
-    const cleaned = text.replace(/```json|```/g, "").trim();
+      // shorten long AI prompts
+      query = query
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .split(" ")
+        .slice(0, 4)
+        .join(" ");
 
-    res.json(JSON.parse(cleaned));
+      console.log("Image search:", query, "| subject:", subject);
 
-  } catch (error) {
+      // Try Wikimedia first (best for educational topics)
+      try {
+        const wiki = await axios.get("https://en.wikipedia.org/w/api.php", {
+          params: {
+            action: "query",
+            generator: "search",
+            gsrsearch: query,
+            gsrlimit: 1,
+            prop: "pageimages",
+            piprop: "original",
+            format: "json"
+          }
+        });
 
-    console.error("Topic check error:", error.response?.data || error.message);
+        const pages = wiki.data?.query?.pages;
+        if (pages) {
+          const page = Object.values(pages)[0];
+          if (page?.original?.source) {
+            console.log("✅ Wikimedia hit");
+            return res.json({ type: "image", url: page.original.source });
+          }
+        }
+      } catch (e) {
+        console.log("❌ Wikimedia failed:", e.message);
+      }
 
-    res.status(500).json({
-      error: "Topic analysis failed"
-    });
 
-  }
+      // Try Unsplash
+      try {
+        const unsplash = await axios.get("https://api.unsplash.com/photos/random", {
+          params: { query, orientation: "landscape" },
+          headers: { Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` }
+        });
 
-});
+        if (unsplash.data?.urls?.small) {
+          console.log("✅ Unsplash hit");
+          return res.json({ type: "image", url: unsplash.data.urls.small });
+        }
+      } catch (e) {
+        console.log("❌ Unsplash failed:", e.message);
+      }
 
-app.listen(3000, () => {
-  console.log("API running on port 3000");
-});
+      // All failed — tell frontend to use icon/emoji/sticker shuffle
+      console.log("⚠️ All image sources failed, using fallback");
+      return res.json({ type: "fallback", url: null });
+
+    } catch (error) {
+      console.error("Image fetch error:", error.response?.data || error.message);
+      return res.json({ type: "fallback", url: null });
+    }
+  });
+
+  app.listen(3000, () => {
+    console.log("API running on port 3000");
+  });
+
