@@ -4,8 +4,9 @@
   "type": "module",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --proxy-config proxy.conf.json",
-   "build": "ng build && mkdir -p .vercel/output/static && cp -r dist/quizzie/browser/* .vercel/output/static",
+    "start": "ng serve",
+    "build": "ng build",
+    "dev": "vercel dev",
     "test": "ng test",
     "serve:ssr:quizzie": "node dist/quizzie/server/server.mjs"
   },
