@@ -19,7 +19,7 @@ export class QuizService {
         this.quizTimer.set(settings.timer ?? null)
         this.quizSubject.set(settings.subject ?? null);
 
-        return this.http.post<any>('http://localhost:3000/api/generate', settings).pipe(
+        return this.http.post<any>('/api/generate', settings).pipe(
             tap(response => {
                 this.currentQuiz.set(response.quiz);
                 this.isLoading.set(false);
@@ -37,7 +37,7 @@ export class QuizService {
     }
 
     checkTopicDifficulty(topic: string, level: string, subLevel: string) {
-        return this.http.post<any>('http://localhost:3000/api/check-topic', {
+        return this.http.post<any>('/api/check-topic', {
             topic,
             level,
             subLevel
@@ -46,7 +46,7 @@ export class QuizService {
 
     getImage(query: string, subject: any) {
         return this.http.get<any>
-        (    `http://localhost:3000/api/image?q=${encodeURIComponent(query)}&subject=${encodeURIComponent(subject)}`
+        (    `/api/image?q=${encodeURIComponent(query)}&subject=${encodeURIComponent(subject)}`
 );
     }
 }
