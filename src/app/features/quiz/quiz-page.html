@@ -28,20 +28,40 @@
       <div class="w-full h-[220px] mb-4 rounded-xl overflow-hidden flex items-center justify-center bg-gray-50">
 
         <!-- Loading: thinking.png -->
-        @if (imageLoading()) {
-          <img
-            src="assets/images/thinking.png"
-            class="w-24 opacity-70 animate-pulse"
-            alt="Thinking mascot"
-          />
+        @if (imageLoading() && !questionImage()) {
+          <video
+            #anyVideo
+            [src]="getSubjectFallbackVideo()"
+            class="w-24 opacity-70"
+            autoplay
+            muted
+            loop
+            playsinline>
+          </video>
         }
 
         <!-- Real image -->
+        @else if (questionImage() && isQuestionVideo()) {
+          <video
+            #questionVideo
+            #anyVideo
+            [src]="questionImage()"
+            class="w-full h-full object-cover"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            (error)="onQuestionVideoError()">
+          </video>
+        }
+
         @else if (questionImage()) {
           <img
             [src]="questionImage()"
             class="w-full h-full object-cover"
             loading="lazy"
+            (error)="onQuestionImageError()"
           />
         }
 

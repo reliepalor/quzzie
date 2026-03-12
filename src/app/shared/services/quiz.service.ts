@@ -11,11 +11,13 @@ export class QuizService {
     isLoading = signal<boolean>(false);
     errorMessage = signal<string | null>(null);
     quizTimer = signal<number | null>(null);
+    quizSubject = signal<string | null>(null);
 
     generateQuiz(settings: QuizSettings) {
         this.isLoading.set(true);
         this.errorMessage.set(null);
         this.quizTimer.set(settings.timer ?? null)
+        this.quizSubject.set(settings.subject ?? null);
 
         return this.http.post<any>('http://localhost:3000/api/generate', settings).pipe(
             tap(response => {

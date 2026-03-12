@@ -30,7 +30,11 @@ export class LandingPage {
   selectedLevel = signal<AcademicLevel | null>(null);
   selectedSubLevel = signal<string | null>(null);
   fileName = signal<string | null>(null);
+
+  showFailedGenerationModal = signal(false);
   showDifficultyModal = signal(false);
+
+
   difficultyMessage = signal<string | null>(null);
   pendingSettings = signal<QuizSettings | null>(null);
 
@@ -160,9 +164,8 @@ export class LandingPage {
         error: (err) => {
           console.error("Topic check failed", err);
 
-          this.validationMessage.set(
-            'Failed to Analyze topic difficulty.'
-          );
+          this.validationMessage.set('Failed to generate quiz. Please try again.');
+          this.showFailedGenerationModal.set(true);
           this.isLoading.set(false);
         }
       });
@@ -181,7 +184,8 @@ export class LandingPage {
       error: (err) => {
         console.error(err);
         this.validationMessage.set('Failed to generate quiz. Please try again.');
-        setTimeout(() => this.isLoading.set(false), 2000);
+        this.showFailedGenerationModal.set(true);
+        this.isLoading.set(false);
       }
     });
   }
@@ -201,6 +205,7 @@ export class LandingPage {
     this.pendingSettings.set(null);
   }
 
+  //-- TOPIC WARNING MODAL BUTTONS
   confirmDifficulty() {
     const settings = this.pendingSettings();
 
@@ -216,6 +221,14 @@ export class LandingPage {
     this.isLoading.set(false);
   }
 
+  //-FAILED GENERATION MODAL
+  confirmFailedGeneration() {
+    this.showFailedGenerationModal.set(false);
+    this.validationMessage.set(null);
+    this.isLoading.set(false);
+  }
+
+  //-- TIMER 
   timerPresets = [
     { label: '5 min',  seconds: 300  },
     { label: '10 min', seconds: 600  },

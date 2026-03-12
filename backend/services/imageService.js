@@ -84,8 +84,8 @@ export async function fetchImage(query, subject) {
   // 4️⃣ Final fallback
 
   return {
-    type: "fallback",
-    url: "/assets/images/thinking.png"
+    type: "video",
+    url: "/images/thinking.mp4"
   };
 
 }
