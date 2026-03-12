@@ -5,8 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
+    "build": "ng build && mkdir -p .vercel/output/static && cp -r dist/quizzie/* .vercel/output/static",    "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:quizzie": "node dist/quizzie/server/server.mjs"
   },
