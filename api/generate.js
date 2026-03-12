@@ -1,4 +1,4 @@
-import axios from "axios";
+import { callGroq } from "../backend/services/groqService.js";
 
 export default async function handler(req, res) {
 
@@ -6,20 +6,34 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { level, subLevel, topic, subject, testType, questionCount } = req.body;
+  const { topic, subject, testType, questionCount, level, subLevel } = req.body;
+
+  const randomSeed = Math.floor(Math.random() * 100000);
 
   const prompt = `
-You are an expert teacher for ${level} (${subLevel}).
+Random Seed: ${randomSeed}
 
-Create a ${questionCount}-question ${testType} quiz about ${topic} in the subject of ${subject}.
+Generate ${questionCount} ${testType} quiz questions.
 
-Return ONLY JSON in this format:
+Topic: ${topic}
+Subject: ${subject}
+Level: ${level}
+Grade/Year: ${subLevel}
+
+Requirements:
+- Each question must use different scenarios
+- iconKeyword → simple object name
+- imageQuery → realistic image search phrase
+
+Return ONLY JSON:
 
 {
  "quiz":[
   {
    "id":1,
    "question":"",
+   "iconKeyword":"",
+   "imageQuery":"",
    "options":["","","",""],
    "answer":"",
    "explanation":""
@@ -30,35 +44,23 @@ Return ONLY JSON in this format:
 
   try {
 
-    const response = await axios.post(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        model: "llama-3.1-70b-versatile",
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.7
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
+    const text = await callGroq(
+      [{ role: "user", content: prompt }],
+      1
     );
 
-    const content = response.data.choices[0].message.content;
+    const cleaned = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    res.status(200).json(JSON.parse(content));
+    return res.status(200).json(JSON.parse(cleaned));
 
   } catch (error) {
 
-    console.error("Groq error:", error.response?.data || error.message);
+    console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "AI generation failed"
     });
 
