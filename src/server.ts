@@ -4,6 +4,66 @@ import axios from "axios";
 const app = express();
 app.use(express.json());
 
+app.post("/api/check-topic", async (req, res) => {
+
+  const { topic, level, subLevel } = req.body;
+
+  const prompt = `
+You are an educational safety checker.
+
+Topic: "${topic}"
+Level: "${level}"
+Grade: "${subLevel}"
+
+Return ONLY JSON:
+
+{
+ "tooAdvanced": boolean,
+ "sensitive": boolean,
+ "reason": ""
+}
+`;
+
+  try {
+
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env["GROQ_API_KEY"]}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const aiText = response.data.choices[0].message.content;
+    const cleaned = aiText.replace(/```json|```/g, "").trim();
+
+    res.json(JSON.parse(cleaned));
+
+  } catch (error: any) {
+
+    console.error("Topic check error:", error.response?.data || error.message);
+
+    res.status(500).json({
+      error: "Topic analysis failed",
+      details: error.message
+    });
+
+  }
+
+});
+
 app.post("/api/generate", async (req, res) => {
 
   const { level, subLevel, topic, subject, testType, questionCount } = req.body;

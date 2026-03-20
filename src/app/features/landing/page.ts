@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AcademicLevel, LEVELS, QuizSettings, TestType} from '../../shared/models/quiz';
 import { QuizService } from '../../shared/services/quiz.service';
+import { LEVEL_YEAR_CONTENT } from '../../shared/models/quiz';
 
 @Component({
   standalone: true,
@@ -22,7 +23,6 @@ export class LandingPage {
   validationMessage = signal<string | null>(null);
 
   allLevels = LEVELS;
-  subjects = ['General','News', 'Science', 'Mathematics', 'History', 'English', 'Computer Science', 'Philosophy'];
   testTypes: TestType[] = ['Multiple Choice', 'Enumeration', 'True/False'];
   questionCounts = [5, 10, 15, 20];
 
@@ -39,26 +39,135 @@ export class LandingPage {
   pendingSettings = signal<QuizSettings | null>(null);
 
   @ViewChild('dropdownRef') dropdownRef!: ElementRef;
+  @ViewChild('subjectDropdownRef') subjectDropdownRef!: ElementRef;
+  @ViewChild('topicDropdownRef') topicDropdownRef!: ElementRef;
   
   dropdownOpen = signal(false);
+  subjectDropdownOpen = signal(false);
+  topicDropdownOpen = signal(false);
+  subjectSearch = signal('');
+  topicSearch = signal('');
 
 
   quizForm = new FormGroup({
     topic: new FormControl('', [Validators.required]),
-    subject: new FormControl('General'),
+    subject: new FormControl('', [Validators.required]),
     testType: new FormControl<TestType>('Multiple Choice'),
     questionCount: new FormControl(10),
     fileBase64: new FormControl<string | null>(null),
     timer: new FormControl<number | null>(null)
   });
 
+  availableContent = computed(() => {
+    const level = this.selectedLevel();
+    const subLevel = this.selectedSubLevel();
+    if (!level || !subLevel) return { subjects: [], suggestedTopics: [] };
+
+    const levelMap = LEVEL_YEAR_CONTENT[level.id] || {};
+    return levelMap[subLevel] || { subjects: [], suggestedTopics: [] };
+  });
+
+  subjects = computed(() => this.availableContent().subjects);
+  suggestedTopics = computed(() => this.availableContent().suggestedTopics);
+  filteredSubjects = computed(() => {
+    const query = this.subjectSearch().trim().toLowerCase();
+    if (!query) return this.subjects();
+    return this.subjects().filter(subject => subject.toLowerCase().includes(query));
+  });
+  filteredSuggestedTopics = computed(() => {
+    const query = this.topicSearch().trim().toLowerCase();
+    if (!query) return this.suggestedTopics();
+    return this.suggestedTopics().filter(topic => topic.toLowerCase().includes(query));
+  });
+
+  
   selectLevel(level: AcademicLevel) {
     this.selectedLevel.set(level);
     this.selectedSubLevel.set(null); 
+    this.subjectDropdownOpen.set(false);
+    this.topicDropdownOpen.set(false);
+    this.subjectSearch.set('');
+    this.topicSearch.set('');
+
+    this.quizForm.patchValue({
+      subject: '',
+      topic: ''
+    });
   }
 
   setSubLevel(sub: string) {
     this.selectedSubLevel.set(sub);
+
+    const level = this.selectedLevel();
+    if (!level) return;
+
+    const alignedContent = LEVEL_YEAR_CONTENT[level.id]?.[sub];
+
+    this.quizForm.patchValue({
+      subject: alignedContent?.subjects[0] ?? '',
+      topic: ''
+    });
+
+    this.subjectSearch.set('');
+    this.topicSearch.set('');
+  }
+
+  toggleSubjectDropdown() {
+    this.subjectDropdownOpen.update(v => !v);
+    this.topicDropdownOpen.set(false);
+  }
+
+  toggleTopicDropdown() {
+    this.topicDropdownOpen.update(v => !v);
+    this.subjectDropdownOpen.set(false);
+  }
+
+  onSubjectSearchInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.subjectSearch.set(value);
+  }
+
+  onTopicSearchInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.topicSearch.set(value);
+  }
+
+  selectSubject(subject: string) {
+    this.quizForm.patchValue({ subject });
+    this.subjectSearch.set(subject);
+    this.subjectDropdownOpen.set(false);
+  }
+
+  selectTopic(topic: string) {
+    this.quizForm.patchValue({ topic });
+    this.topicSearch.set(topic);
+    this.topicDropdownOpen.set(false);
+  }
+
+  useTypedSubject() {
+    const typed = this.subjectSearch().trim();
+    if (!typed) return;
+    this.quizForm.patchValue({ subject: typed });
+    this.subjectDropdownOpen.set(false);
+  }
+
+  useTypedTopic() {
+    const typed = this.topicSearch().trim();
+    if (!typed) return;
+    this.quizForm.patchValue({ topic: typed });
+    this.topicDropdownOpen.set(false);
+  }
+
+  clearSubject(event: MouseEvent) {
+    event.stopPropagation();
+    this.quizForm.patchValue({ subject: '' });
+    this.subjectSearch.set('');
+  }
+
+  clearTopic(event: MouseEvent) {
+    event.stopPropagation();
+    this.quizForm.patchValue({ topic: '' });
+    this.topicSearch.set('');
   }
 
   isTopicTooAdvanced(topic: string, level: string): boolean{
@@ -275,8 +384,18 @@ export class LandingPage {
 
   @HostListener('document:click', ['$event'])
   onOutsideClick(event: MouseEvent) {
-    if (!this.dropdownRef?.nativeElement.contains(event.target)) {
+    const target = event.target as Node;
+
+    if (this.dropdownRef && !this.dropdownRef.nativeElement.contains(target)) {
       this.dropdownOpen.set(false);
+    }
+
+    if (this.subjectDropdownRef && !this.subjectDropdownRef.nativeElement.contains(target)) {
+      this.subjectDropdownOpen.set(false);
+    }
+
+    if (this.topicDropdownRef && !this.topicDropdownRef.nativeElement.contains(target)) {
+      this.topicDropdownOpen.set(false);
     }
   }
 }
