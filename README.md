@@ -4,7 +4,15 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
+To start the frontend and API backend together, run:
+
+```bash
+npm run start
+```
+
+This starts the Express API on port 3000 and the Angular dev server on port 4300 with `/api` proxied to the backend.
+
+If you only want the Angular app without the backend, run:
 
 ```bash
 ng serve

@@ -1,11 +1,27 @@
+import "dotenv/config";
 import express from "express";
 import axios from "axios";
 
 const app = express();
 app.use(express.json());
 
-app.post("/api/check-topic", async (req, res) => {
+function extractJsonPayload(text: string) {
+  const cleaned = text
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
 
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    return cleaned;
+  }
+
+  return cleaned.slice(firstBrace, lastBrace + 1);
+}
+
+app.post("/api/check-topic", async (req, res) => {
   const { topic, level, subLevel } = req.body;
 
   const prompt = `
@@ -25,7 +41,6 @@ Return ONLY JSON:
 `;
 
   try {
-
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       {
@@ -47,25 +62,20 @@ Return ONLY JSON:
     );
 
     const aiText = response.data.choices[0].message.content;
-    const cleaned = aiText.replace(/```json|```/g, "").trim();
+    const cleaned = extractJsonPayload(aiText);
 
     res.json(JSON.parse(cleaned));
-
   } catch (error: any) {
-
     console.error("Topic check error:", error.response?.data || error.message);
 
     res.status(500).json({
       error: "Topic analysis failed",
       details: error.message
     });
-
   }
-
 });
 
 app.post("/api/generate", async (req, res) => {
-
   const { level, subLevel, topic, subject, testType, questionCount } = req.body;
 
   const prompt = `
@@ -89,11 +99,10 @@ Return ONLY JSON:
 `;
 
   try {
-
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "user",
@@ -111,22 +120,17 @@ Return ONLY JSON:
     );
 
     const aiText = response.data.choices[0].message.content;
-
-    const parsed = JSON.parse(aiText);
+    const parsed = JSON.parse(extractJsonPayload(aiText));
 
     res.json(parsed);
-
   } catch (error: any) {
-
     console.error("Groq error:", error.response?.data || error.message);
 
     res.status(500).json({
       error: "AI Generation Failed",
       details: error.message
     });
-
   }
-
 });
 
 app.listen(3000, () => {

@@ -47,6 +47,9 @@
     timeLeft = signal<number>(0);
     timerInterval: any;
 
+    isLearningMode = computed(() => this.quizService.testMode() === 'learning');
+    isExamMode = computed(() => this.quizService.testMode() === 'exam');
+
     currentQuestion = computed(() => this.questions()?.[this.currentIndex()]);
 
     private DISPLAY_TYPES: Array<'icon' | 'emoji' | 'sticker'> = ['icon', 'emoji', 'sticker'];

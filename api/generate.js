@@ -1,12 +1,28 @@
 import { callGroq } from "../backend/services/groqService.js";
 
+function extractJsonPayload(text) {
+  const cleaned = text
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    return cleaned;
+  }
+
+  return cleaned.slice(firstBrace, lastBrace + 1);
+}
+
 export default async function handler(req, res) {
 
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { topic, subject, testType, questionCount, level, subLevel } = req.body;
+  const { topic, subject, testType, questionCount, level, subLevel, testMode } = req.body;
 
   const randomSeed = Math.floor(Math.random() * 100000);
 
@@ -19,6 +35,7 @@ Topic: ${topic}
 Subject: ${subject}
 Level: ${level}
 Grade/Year: ${subLevel}
+Test Mode: ${testMode || 'learning'}
 
 Requirements:
 - Each question must use different scenarios
@@ -49,12 +66,7 @@ Return ONLY JSON:
       1
     );
 
-    const cleaned = text
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
-    return res.status(200).json(JSON.parse(cleaned));
+    return res.status(200).json(JSON.parse(extractJsonPayload(text)));
 
   } catch (error) {
 

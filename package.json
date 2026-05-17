@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "concurrently -k \"npm run start:api\" \"npm run start:web\"",
+    "start:web": "ng serve --port 4300 --proxy-config proxy.conf.json",
+    "start:api": "tsx src/server.ts",
     "build": "ng build",
     "dev": "vercel dev",
     "test": "ng test",
@@ -52,7 +54,9 @@
     "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^5.0.1",
     "@types/node": "^20.17.19",
+    "concurrently": "^9.2.1",
     "jsdom": "^27.1.0",
+    "tsx": "^4.22.1",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }

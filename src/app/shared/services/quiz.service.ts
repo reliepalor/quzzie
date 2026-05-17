@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { QuizSettings } from '../models/quiz';
+import { QuizSettings, TestMode } from '../models/quiz';
 import { catchError, tap, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -12,12 +12,14 @@ export class QuizService {
     errorMessage = signal<string | null>(null);
     quizTimer = signal<number | null>(null);
     quizSubject = signal<string | null>(null);
+    testMode = signal<TestMode>('learning');
 
     generateQuiz(settings: QuizSettings) {
         this.isLoading.set(true);
         this.errorMessage.set(null);
         this.quizTimer.set(settings.timer ?? null)
         this.quizSubject.set(settings.subject ?? null);
+        this.testMode.set(settings.testMode ?? 'learning');
 
         return this.http.post<any>('/api/generate', settings).pipe(
             tap(response => {

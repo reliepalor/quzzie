@@ -2,7 +2,7 @@ import { Component, signal, inject, computed, ElementRef, ViewChild, HostListene
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; 
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { AcademicLevel, LEVELS, QuizSettings, TestType} from '../../shared/models/quiz';
+import { AcademicLevel, LEVELS, QuizSettings, TestMode, TestType } from '../../shared/models/quiz';
 import { QuizService } from '../../shared/services/quiz.service';
 import { LEVEL_YEAR_CONTENT } from '../../shared/models/quiz';
 
@@ -24,9 +24,14 @@ export class LandingPage {
 
   allLevels = LEVELS;
   testTypes: TestType[] = ['Multiple Choice', 'Enumeration', 'True/False'];
+  testModes: Array<{ id: TestMode; label: string; icon: string; shortLabel: string }> = [
+    { id: 'learning', label: 'Learning Mode', icon: '🧠', shortLabel: 'Practice' },
+    { id: 'exam', label: 'Exam Mode', icon: '⏱️', shortLabel: 'Simulation' }
+  ];
   questionCounts = [5, 10, 15, 20];
 
   //signals for fetching data
+  selectedTestMode = signal<TestMode>('learning');
   selectedLevel = signal<AcademicLevel | null>(null);
   selectedSubLevel = signal<string | null>(null);
   fileName = signal<string | null>(null);
@@ -79,6 +84,16 @@ export class LandingPage {
     if (!query) return this.suggestedTopics();
     return this.suggestedTopics().filter(topic => topic.toLowerCase().includes(query));
   });
+
+  testModeExplanation = computed(() => {
+    return this.selectedTestMode() === 'learning'
+      ? 'Learning Mode: In this mode, you will receive immediate feedback after each answer. The system will show if your answer is correct or incorrect right away, along with a clear explanation. This mode is designed to help you learn and understand each concept step by step.'
+      : 'Exam Mode: In this mode, no feedback or correct answers will be shown during the test. You will complete all questions first, and your score and explanations will only appear after submitting the test. This mode simulates a real exam environment.';
+  });
+
+  selectTestMode(mode: TestMode) {
+    this.selectedTestMode.set(mode);
+  }
 
   
   selectLevel(level: AcademicLevel) {
@@ -237,6 +252,7 @@ export class LandingPage {
       const settings = {
         ...this.quizForm.value,
         topic,
+        testMode: this.selectedTestMode(),
         level: this.selectedLevel()?.name,
         subLevel: this.selectedSubLevel()
       } as QuizSettings;

@@ -14,7 +14,10 @@ export const LEVELS: AcademicLevel[] = [
 
 export type TestType = 'Multiple Choice' | 'Enumeration' | 'True/False';
 
+export type TestMode = 'learning' | 'exam';
+
 export interface QuizSettings {
+  testMode: TestMode;
   level: string;
   subLevel: string;
   topic: string;

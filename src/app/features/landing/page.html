@@ -7,10 +7,46 @@
       <p class="text-slate-500 font-medium  ">Your personalized AI study partner.</p>
     </header>
 
-    <!--LEVEL SECTION -->
+    <!-- MODE SECTION -->
     <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
       <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
         <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+        Test Mode Selection
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        @for (mode of testModes; track mode.id) {
+          <button
+            type="button"
+            (click)="selectTestMode(mode.id)"
+            [class.border-blue-600]="selectedTestMode() === mode.id"
+            [class.bg-blue-50]="selectedTestMode() === mode.id"
+            class="p-4 rounded-2xl border-2 border-slate-100 hover:border-blue-200 transition-all text-left group">
+            <span class="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400 mb-2">
+              <span class="text-base">{{ mode.icon }}</span>
+              {{ mode.shortLabel }}
+            </span>
+            <span class="block font-bold text-slate-900">{{ mode.label }}</span>
+            <span class="text-xs text-slate-500 mt-1 block">
+              @if (mode.id === 'learning') {
+                Immediate feedback and step-by-step explanations.
+              } @else {
+                Quiet simulation with results at the end.
+              }
+            </span>
+          </button>
+        }
+      </div>
+
+      <div class="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-sm leading-relaxed text-slate-700">
+        {{ testModeExplanation() }}
+      </div>
+    </section>
+
+    <!--LEVEL SECTION -->
+    <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+      <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+        <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
         Choose your Level
       </h2>
       <div class="grid grid-cols-2 gap-3">
@@ -196,7 +232,7 @@
 
 
         <h2 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2">
-          <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">3</span>
+          <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">4</span>
           Quiz Style
         </h2>
         

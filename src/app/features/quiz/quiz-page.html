@@ -109,25 +109,27 @@
                 class="flex items-center gap-3 px-4 py-3.5 rounded-xl border-[1.5px] text-left transition-all duration-150 disabled:cursor-default"
                 [class]="
                   !selectedAnswer() ? 'border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/40 hover:translate-x-0.5' :
-                  opt === currentQuestion().answer ? 'border-emerald-400 bg-emerald-50' :
-                  selectedAnswer() === opt ? 'border-red-400 bg-red-50' :
+                  isLearningMode() && opt === currentQuestion().answer ? 'border-emerald-400 bg-emerald-50' :
+                  isLearningMode() && selectedAnswer() === opt ? 'border-red-400 bg-red-50' :
+                  isExamMode() && selectedAnswer() === opt ? 'border-blue-400 bg-blue-50' :
                   'border-slate-100 bg-slate-50 opacity-50'">
                 <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0 mono transition-colors"
                   [class]="
                     !selectedAnswer() ? 'bg-slate-200 text-slate-500' :
-                    opt === currentQuestion().answer ? 'bg-emerald-500 text-white' :
-                    selectedAnswer() === opt ? 'bg-red-500 text-white' :
+                    isLearningMode() && opt === currentQuestion().answer ? 'bg-emerald-500 text-white' :
+                    isLearningMode() && selectedAnswer() === opt ? 'bg-red-500 text-white' :
+                    isExamMode() && selectedAnswer() === opt ? 'bg-blue-500 text-white' :
                     'bg-slate-100 text-slate-400'">
                   {{ 'ABCD'[i] }}
                 </span>
                 <span class="flex-1 text-sm font-medium text-slate-700">{{ opt }}</span>
                 <span class="flex-shrink-0 w-4 h-4">
-                  @if (selectedAnswer() && opt === currentQuestion().answer) {
+                  @if (selectedAnswer() && isLearningMode() && opt === currentQuestion().answer) {
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <circle cx="8" cy="8" r="7" fill="#10b981"/>
                       <path d="M4.5 8l2.5 2.5 4.5-5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                  } @else if (selectedAnswer() === opt && opt !== currentQuestion().answer) {
+                  } @else if (selectedAnswer() && isLearningMode() && selectedAnswer() === opt && opt !== currentQuestion().answer) {
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <circle cx="8" cy="8" r="7" fill="#ef4444"/>
                       <path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="white" stroke-width="1.7" stroke-linecap="round"/>
@@ -166,7 +168,7 @@
         }
 
         <!-- Answer reveal -->
-        @if (selectedAnswer()) {
+        @if (selectedAnswer() && isLearningMode()) {
           <div class="reveal-up border-t border-slate-100 pt-4 flex flex-col gap-3">
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col gap-1.5">
               <span class="flex items-center gap-1.5 mono text-[11px] font-semibold uppercase tracking-widest text-blue-500">
@@ -180,6 +182,27 @@
               @if (currentQuestion().explanation) {
                 <p class="text-[13px] text-slate-500 leading-relaxed">{{ currentQuestion().explanation }}</p>
               }
+            </div>
+            <button (click)="nextQuestion()"
+              class="w-full flex items-center justify-center gap-2 py-3.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-px transition-all duration-150">
+              Next
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                <path d="M2.5 7.5h10M9 4l3.5 3.5L9 11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        }
+
+        @if (selectedAnswer() && isExamMode()) {
+          <div class="reveal-up border-t border-slate-100 pt-4 flex flex-col gap-3">
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3">
+              <div>
+                <span class="flex items-center gap-1.5 mono text-[11px] font-semibold uppercase tracking-widest text-slate-400">
+                  Exam Mode
+                </span>
+                <p class="text-sm font-semibold text-slate-900 mt-1">Answer recorded. Continue when you're ready.</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-slate-900 text-white text-[11px] font-semibold uppercase tracking-widest">Locked In</span>
             </div>
             <button (click)="nextQuestion()"
               class="w-full flex items-center justify-center gap-2 py-3.5 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 hover:-translate-y-px transition-all duration-150">
@@ -241,6 +264,30 @@
           </svg>
           Try Another Quiz
         </button>
+
+        @if (isExamMode()) {
+          <div class="w-full mt-4 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-lg font-bold text-slate-900">Post-Test Review</h3>
+              <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold uppercase tracking-widest">Exam Mode</span>
+            </div>
+
+            <div class="space-y-3">
+              @for (question of questions(); track question.id) {
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 flex flex-col gap-2">
+                  <div class="flex items-start justify-between gap-3">
+                    <p class="text-sm font-semibold text-slate-900 leading-relaxed">{{ question.question }}</p>
+                    <span class="shrink-0 px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold uppercase tracking-widest">Correct</span>
+                  </div>
+                  <p class="text-sm text-slate-700"><span class="font-semibold text-slate-500">Answer:</span> {{ question.answer }}</p>
+                  @if (question.explanation) {
+                    <p class="text-sm text-slate-500 leading-relaxed">{{ question.explanation }}</p>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
 
       </div>
     }
