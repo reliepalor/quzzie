@@ -1,37 +1,96 @@
-<div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6">
+<div *ngIf="!showLanding" class="min-h-screen pre-gate-bg p-4 sm:p-6 flex items-center justify-center">
+  <div class="w-full max-w-xl pre-gate-card pre-gate-enter rounded-3xl p-6 sm:p-8 text-slate-800" [class.pre-gate-exit]="isExitingGate">
+    <div class="grid md:grid-cols-2 gap-6 items-center">
+      <div>
+        <div class="pre-gate-mascot-wrap mb-5" aria-hidden="true">
+          <div class="pre-gate-book-stack"></div>
+          <div class="pre-gate-robot">
+            <div class="pre-gate-head">
+              <span class="pre-gate-leaf pre-gate-leaf-left"></span>
+              <span class="pre-gate-leaf pre-gate-leaf-right"></span>
+              <span class="pre-gate-eye pre-gate-eye-left"></span>
+              <span class="pre-gate-eye pre-gate-eye-right"></span>
+              <span class="pre-gate-blush pre-gate-blush-left"></span>
+              <span class="pre-gate-blush pre-gate-blush-right"></span>
+              <span class="pre-gate-smile"></span>
+            </div>
+            <div class="pre-gate-body"></div>
+          </div>
+          <div class="pre-gate-vial"></div>
+        </div>
 
-  <div class="w-full max-w-md bg-transparent 
-              sm:rounded-3xl sm:shadow-xl sm:border sm:border-slate-200 
-              p-6 sm:p-8 text-center">
+        <h1 class="text-2xl sm:text-3xl font-black leading-tight mb-2">
+          Quick Fun Facts
+        </h1>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Before we start, check these trivia notes about how Quizzie works.
+        </p>
+      </div>
 
-    <!-- HERO IMAGE -->
+      <div>
+        <div class="mb-4">
+          <div
+            class="pre-gate-fact-card"
+            [class.pre-gate-fact-enter-a]="factCardVersion % 2 === 0"
+            [class.pre-gate-fact-enter-b]="factCardVersion % 2 === 1">
+            {{ activeFact }}
+          </div>
+        </div>
+
+        <div class="pre-gate-pagination" aria-label="Trivia navigation">
+          <button
+            *ngFor="let fact of triviaFacts; let index = index"
+            type="button"
+            class="pre-gate-dot"
+            [class.is-active]="index === activeFactIndex"
+            [attr.aria-label]="'Show fact ' + (index + 1)"
+            (click)="selectFact(index)">
+          </button>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            class="flex-1 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 transition-colors"
+            (click)="advanceFact()">
+            {{ isLastFact ? 'I Agree' : 'Okay' }}
+          </button>
+
+          <button
+            *ngIf="!isLastFact"
+            type="button"
+            class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
+            (click)="openLanding()">
+            Skip to Start
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showLanding" class="min-h-screen bg-slate-50 flex items-center justify-center p-4 sm:p-6 landing-enter-wrap">
+  <div class="w-full max-w-md bg-transparent sm:rounded-3xl sm:shadow-xl sm:border sm:border-slate-200 p-6 sm:p-8 text-center landing-enter-card">
     <div class="flex justify-center mb-6">
-      <img 
+      <img
         src="/images/jaya.png"
         alt="Quiz learning illustration"
         class="w-48 sm:w-64 object-contain">
     </div>
 
-    <!-- MAIN MESSAGE -->
     <h2 class="text-lg sm:text-xl font-bold text-slate-800 mb-2">
       Test Your Wisdom
     </h2>
 
     <p class="text-slate-500 text-sm leading-relaxed mb-8">
-      Generate smart quizzes instantly using AI.  
+      Generate smart quizzes instantly using AI.
       Learn faster, review topics, and challenge your knowledge.
     </p>
 
-    <!-- CTA BUTTON -->
     <button
       [routerLink]="['/quizzie']"
-      class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl
-             hover:bg-blue-700 transition-all sm:shadow-lg sm:shadow-blue-200">
-
+      class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition-all sm:shadow-lg sm:shadow-blue-200">
       Get Started
-
     </button>
-
   </div>
-
-</div>  
+</div>
