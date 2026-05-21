@@ -28,6 +28,7 @@
     currentIndex = signal(0);
     selectedAnswer = signal<string | null>(null);
     userInput = signal('');
+    userAnswers = signal<Record<string, string | null>>({});
 
     questionImage = signal<string | null>(null);
     nextImage = signal<string | null>(null);
@@ -99,6 +100,7 @@
     selectOption(option: string) {
       if (this.selectedAnswer()) return;
       this.selectedAnswer.set(option);
+      this.saveAnswer(option);
 
       if (option === this.currentQuestion().answer) {
         this.score.update(s => s + 1);
@@ -110,10 +112,30 @@
       const correctAnswer = this.currentQuestion().answer.trim().toLowerCase();
 
       this.selectedAnswer.set(this.userInput());
+      this.saveAnswer(this.userInput());
 
       if(userAnswer === correctAnswer) {
           this.score.update(s => s +1 );
       }
+    }
+
+    private saveAnswer(answer: string): void {
+      const question = this.currentQuestion();
+      if (!question) return;
+      this.userAnswers.update(answers => ({
+        ...answers,
+        [question.id]: answer
+      }));
+    }
+
+    isAnswerCorrect(question: any): boolean {
+      const userAnswer = this.userAnswers()[question.id];
+      if (!userAnswer) return false;
+      return userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase();
+    }
+
+    getUserAnswer(question: any): string | null {
+      return this.userAnswers()[question.id] || null;
     }
 
     nextQuestion() {

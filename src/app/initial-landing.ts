@@ -30,6 +30,8 @@ export class InitialLanding {
   }
 
   protected advanceFact(): void {
+    this.playCuteSound();
+
     if (this.isLastFact) {
       this.openLanding();
       return;
@@ -49,7 +51,15 @@ export class InitialLanding {
   }
 
   protected openLanding(): void {
-    if (!this.isLastFact || this.isExitingGate) {
+    this.openLandingWithGateCheck(false);
+  }
+
+  protected skipToStart(): void {
+    this.openLandingWithGateCheck(true);
+  }
+
+  private openLandingWithGateCheck(force: boolean): void {
+    if ((!force && !this.isLastFact) || this.isExitingGate) {
       return;
     }
 
@@ -59,5 +69,41 @@ export class InitialLanding {
       void this.router.navigateByUrl('/quizzie');
       this.isExitingGate = false;
     }, 280);
+  }
+
+  private playCuteSound(): void {
+    const AudioContextClass = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+    if (!AudioContextClass) {
+      return;
+    }
+
+    const audioContext = new AudioContextClass();
+
+    if (audioContext.state === 'suspended') {
+      void audioContext.resume();
+    }
+
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(660, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(920, audioContext.currentTime + 0.09);
+
+    gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.08, audioContext.currentTime + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.16);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.18);
+
+    oscillator.onended = () => {
+      gainNode.disconnect();
+      audioContext.close().catch(() => undefined);
+    };
   }
 }
