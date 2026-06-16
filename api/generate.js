@@ -1,4 +1,5 @@
 import { callGroq } from "../backend/services/groqService.js";
+import { checkRateLimit, validateGenerateRequest } from "../backend/services/apiSecurity.js";
 
 function extractJsonPayload(text) {
   const cleaned = text
@@ -22,7 +23,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { topic, subject, testType, questionCount, level, subLevel, testMode } = req.body;
+  if (!checkRateLimit(req, res, {
+    key: "api-generate",
+    max: 6,
+    windowMs: 60_000,
+    message: "Too many quiz generation requests. Try again in a minute."
+  })) {
+    return;
+  }
+
+  const parsedRequest = validateGenerateRequest(req.body);
+
+  if (!parsedRequest.ok) {
+    return res.status(400).json({ error: parsedRequest.error });
+  }
+
+  const { topic, subject, testType, questionCount, level, subLevel, testMode } = parsedRequest.value;
 
   const randomSeed = Math.floor(Math.random() * 100000);
 

@@ -1,0 +1,173 @@
+<div class="account-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+    <header class="flex flex-col gap-4 rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div class="space-y-2">
+        <div class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+          Account shell
+        </div>
+        <div>
+          <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{{ displayName }}</h1>
+          <p class="mt-1 text-sm text-slate-500">{{ email }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-blue-200 hover:text-blue-700" (click)="goToQuiz()">
+          Back to quiz
+        </button>
+        <button type="button" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800" (click)="signOut()">
+          Sign out
+        </button>
+      </div>
+    </header>
+
+    <section class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+      <div class="space-y-6">
+        <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.07)] sm:p-6">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Profile summary</p>
+              <h2 class="mt-2 text-2xl font-extrabold text-slate-900">Welcome back</h2>
+              <p class="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                This is the first version of the account shell. It gives signed-in users a place to land while history, saved quizzes, and progress data are connected.
+              </p>
+            </div>
+
+            <div class="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              <div class="font-semibold text-slate-900">Member since</div>
+              <div class="mt-1">{{ memberSince }}</div>
+            </div>
+          </div>
+
+          @if (profileLoading()) {
+            <div class="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+              Loading account details...
+            </div>
+          }
+
+          @if (profileError()) {
+            <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+              {{ profileError() }}
+            </div>
+          }
+        </div>
+
+        <nav class="rounded-[1.75rem] border border-slate-200 bg-white p-2 shadow-[0_14px_40px_rgba(15,23,42,0.07)]">
+          <div class="grid gap-2 sm:grid-cols-4">
+            @for (section of sections; track section.id) {
+              <button
+                type="button"
+                class="rounded-2xl px-4 py-3 text-left transition-all"
+                [class.bg-slate-900]="activeSection() === section.id"
+                [class.text-white]="activeSection() === section.id"
+                [class.shadow-lg]="activeSection() === section.id"
+                [class.shadow-slate-900/10]="activeSection() === section.id"
+                [class.bg-slate-50]="activeSection() !== section.id"
+                [class.text-slate-700]="activeSection() !== section.id"
+                (click)="selectSection(section.id)">
+                <div class="text-sm font-semibold">{{ section.label }}</div>
+                <div class="mt-1 text-xs leading-5 opacity-80">{{ section.description }}</div>
+              </button>
+            }
+          </div>
+        </nav>
+
+        <div class="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.07)] sm:p-6">
+          @if (activeSection() === 'history') {
+            <div class="space-y-4">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">History</p>
+                <h3 class="mt-2 text-xl font-extrabold text-slate-900">Quiz attempts will appear here</h3>
+              </div>
+              <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
+                No attempts are stored yet. Once quiz history is connected, this tab will show recent runs, scores, and quick review links.
+              </div>
+            </div>
+          }
+
+          @if (activeSection() === 'saved') {
+            <div class="space-y-4">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Saved</p>
+                <h3 class="mt-2 text-xl font-extrabold text-slate-900">Bookmarks and saved quizzes</h3>
+              </div>
+              <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
+                Saved quizzes and question bookmarks will land here so users can return to the topics they want to revisit.
+              </div>
+            </div>
+          }
+
+          @if (activeSection() === 'progress') {
+            <div class="space-y-5">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Progress</p>
+                <h3 class="mt-2 text-xl font-extrabold text-slate-900">A clean place for learning trends</h3>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-3">
+                <div class="rounded-2xl bg-slate-50 p-4">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Accuracy</div>
+                  <div class="mt-2 text-3xl font-black text-slate-900">--</div>
+                  <div class="mt-1 text-sm text-slate-500">Awaiting quiz attempts</div>
+                </div>
+                <div class="rounded-2xl bg-slate-50 p-4">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Weak topics</div>
+                  <div class="mt-2 text-3xl font-black text-slate-900">--</div>
+                  <div class="mt-1 text-sm text-slate-500">Will surface recurring misses</div>
+                </div>
+                <div class="rounded-2xl bg-slate-50 p-4">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Streak</div>
+                  <div class="mt-2 text-3xl font-black text-slate-900">--</div>
+                  <div class="mt-1 text-sm text-slate-500">Daily and weekly stats later</div>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (activeSection() === 'settings') {
+            <div class="space-y-4">
+              <div>
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Settings</p>
+                <h3 class="mt-2 text-xl font-extrabold text-slate-900">Profile and learning preferences</h3>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-2">
+                <div class="rounded-2xl bg-slate-50 p-4">
+                  <div class="text-sm font-semibold text-slate-900">Display name</div>
+                  <div class="mt-1 text-sm text-slate-500">Use the Supabase profile record once editable settings are added.</div>
+                </div>
+                <div class="rounded-2xl bg-slate-50 p-4">
+                  <div class="text-sm font-semibold text-slate-900">Defaults</div>
+                  <div class="mt-1 text-sm text-slate-500">Learning mode, timer, and accessibility settings will live here.</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <aside class="space-y-6">
+        <div class="rounded-[1.75rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+          <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Signed in</p>
+          <div class="mt-3 text-2xl font-extrabold tracking-tight">{{ displayName }}</div>
+          <div class="mt-2 text-sm leading-6 text-slate-300">{{ email }}</div>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">Quizzie account</span>
+            <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">Phase 1</span>
+          </div>
+        </div>
+
+        <div class="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_14px_40px_rgba(15,23,42,0.07)]">
+          <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Next step</p>
+          <h3 class="mt-2 text-xl font-extrabold text-slate-900">Connect quiz history</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-500">
+            The shell is in place. The next phase is wiring quiz attempts into the History tab, then layering saved items and progress metrics on top.
+          </p>
+          <button type="button" class="mt-5 w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700" (click)="goToQuiz()">
+            Start a quiz
+          </button>
+        </div>
+      </aside>
+    </section>
+  </div>
+</div>

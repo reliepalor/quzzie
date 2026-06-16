@@ -1,22 +1,26 @@
 import { fetchImage } from "../backend/services/imageService.js";
+import { checkRateLimit, validateImageRequest } from "../backend/services/apiSecurity.js";
 
 export default async function handler(req, res) {
 
   try {
 
-    let query = req.query.q;
-    const subject = req.query.subject || "";
-
-    if (!query) {
-      return res.status(400).json({ error: "Missing query" });
+    if (!checkRateLimit(req, res, {
+      key: "api-image",
+      max: 20,
+      windowMs: 60_000,
+      message: "Too many image lookups. Try again in a minute."
+    })) {
+      return;
     }
 
-    query = query
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, "")
-      .split(" ")
-      .slice(0, 4)
-      .join(" ");
+    const parsedRequest = validateImageRequest(req.query.q, req.query.subject || "");
+
+    if (!parsedRequest.ok) {
+      return res.status(400).json({ error: parsedRequest.error });
+    }
+
+    const { query, subject } = parsedRequest.value;
 
     const image = await fetchImage(query, subject);
 
