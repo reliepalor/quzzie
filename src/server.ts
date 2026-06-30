@@ -8,6 +8,14 @@ import {
   validateImageRequest
 } from "../backend/services/apiSecurity.js";
 import { fetchImage } from "../backend/services/imageService.js";
+import {
+  getProfile,
+  listQuizAttempts,
+  listSavedQuizzes,
+  saveQuizAttempt,
+  saveQuizBookmark,
+  upsertProfile
+} from "../backend/services/neonService";
 
 const app = express();
 app.use(express.json());
@@ -199,6 +207,73 @@ app.get("/api/image", async (req, res) => {
       type: "video",
       url: "/images/thinking.mp4"
     });
+  }
+});
+
+app.get("/api/profile/:userId", async (req, res) => {
+  try {
+    const profile = await getProfile(req.params.userId);
+
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    return res.json(profile);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to load profile", details: error.message });
+  }
+});
+
+app.put("/api/profile/:userId", async (req, res) => {
+  try {
+    const payload = {
+      user_id: req.params.userId,
+      display_name: typeof req.body?.display_name === "string" ? req.body.display_name : null,
+      avatar_url: typeof req.body?.avatar_url === "string" ? req.body.avatar_url : null,
+      created_at: typeof req.body?.created_at === "string" ? req.body.created_at : new Date().toISOString()
+    };
+
+    const profile = await upsertProfile(payload);
+    return res.json(profile);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to save profile", details: error.message });
+  }
+});
+
+app.get("/api/quiz-attempts/:userId", async (req, res) => {
+  try {
+    const limit = Number(req.query["limit"] ?? 20);
+    const attempts = await listQuizAttempts(req.params.userId, Number.isFinite(limit) ? limit : 20);
+    return res.json(attempts);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to load quiz attempts", details: error.message });
+  }
+});
+
+app.post("/api/quiz-attempts", async (req, res) => {
+  try {
+    const savedAttempt = await saveQuizAttempt(req.body);
+    return res.status(201).json(savedAttempt);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to save quiz attempt", details: error.message });
+  }
+});
+
+app.get("/api/saved-quizzes/:userId", async (req, res) => {
+  try {
+    const savedQuizzes = await listSavedQuizzes(req.params.userId);
+    return res.json(savedQuizzes);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to load saved quizzes", details: error.message });
+  }
+});
+
+app.post("/api/saved-quizzes", async (req, res) => {
+  try {
+    const savedQuiz = await saveQuizBookmark(req.body);
+    return res.status(201).json(savedQuiz);
+  } catch (error: any) {
+    return res.status(500).json({ error: "Failed to save quiz bookmark", details: error.message });
   }
 });
 

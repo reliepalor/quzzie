@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router'; 
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AcademicLevel, LEVELS, QuizSettings, TestMode, TestType } from '../../shared/models/quiz';
+import { FirebaseAuthService } from '../../shared/services/firebase-auth.service';
 import { QuizService } from '../../shared/services/quiz.service';
 import { LEVEL_YEAR_CONTENT } from '../../shared/models/quiz';
 
@@ -18,6 +19,7 @@ import { LEVEL_YEAR_CONTENT } from '../../shared/models/quiz';
 export class LandingPage {
   private quizService = inject(QuizService);
   private router = inject(Router);
+  private auth = inject(FirebaseAuthService);
 
   isLoading = signal(false);
   validationMessage = signal<string | null>(null);
@@ -42,6 +44,12 @@ export class LandingPage {
 
   difficultyMessage = signal<string | null>(null);
   pendingSettings = signal<QuizSettings | null>(null);
+
+  protected readonly signedInUser = computed(() => this.auth.user());
+  protected readonly profileLabel = computed(() => {
+    const user = this.signedInUser();
+    return user?.displayName || user?.email?.split('@')[0] || 'Profile';
+  });
 
   @ViewChild('dropdownRef') dropdownRef!: ElementRef;
   @ViewChild('subjectDropdownRef') subjectDropdownRef!: ElementRef;
