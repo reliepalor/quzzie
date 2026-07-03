@@ -1,13 +1,22 @@
 <div class="account-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
   <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-    <header class="flex flex-col gap-4 rounded-[2rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:p-6">
+    <header class="flex flex-col gap-4 rounded-4xl border border-slate-200/80 bg-white/90 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:p-6">
       <div class="space-y-2">
-        <div class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-          Account shell
-        </div>
-        <div>
-          <h1 class="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{{ displayName }}</h1>
-          <p class="mt-1 text-sm text-slate-500">{{ email }}</p>
+        <div class="flex items-center gap-3">
+          <span class="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 to-cyan-500 text-base font-black text-white ring-1 ring-slate-200">
+            @if (avatarUrl()) {
+              <img [src]="avatarUrl()!" alt="Profile photo" class="h-full w-full object-cover">
+            } @else {
+              {{ displayName[0] }}
+            }
+          </span>
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+              Account shell
+            </div>
+            <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{{ displayName }}</h1>
+            <p class="mt-1 text-sm text-slate-500">{{ email }}</p>
+          </div>
         </div>
       </div>
 
@@ -29,7 +38,7 @@
               <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Profile summary</p>
               <h2 class="mt-2 text-2xl font-extrabold text-slate-900">Welcome back</h2>
               <p class="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                This is the first version of the account shell. It gives signed-in users a place to land while Neon history, saved quizzes, and progress data are connected.
+                Your quiz history is now tied to the quizzes you actually generate, so you can review attempts, scores, and the topics you reach for most.
               </p>
             </div>
 
@@ -38,6 +47,30 @@
               <div class="mt-1">{{ memberSince }}</div>
             </div>
           </div>
+
+          <div class="mt-6 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-2xl bg-blue-50 px-4 py-3">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-500">Practice accuracy</div>
+              <div class="mt-1 text-2xl font-black text-slate-900">{{ analytics().practiceFirstAttemptAccuracy }}%</div>
+              <div class="text-sm text-slate-500">First try, before retries</div>
+            </div>
+            <div class="rounded-2xl bg-emerald-50 px-4 py-3">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-600">Exam average</div>
+              <div class="mt-1 text-2xl font-black text-slate-900">{{ analytics().averageExamScore }}%</div>
+              <div class="text-sm text-slate-500">Strict exam sessions only</div>
+            </div>
+            <div class="rounded-2xl bg-amber-50 px-4 py-3">
+              <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600">Top weak topic</div>
+              <div class="mt-1 text-2xl font-black text-slate-900 truncate">{{ analytics().topWeakTopic }}</div>
+              <div class="text-sm text-slate-500">Lowest average score area</div>
+            </div>
+          </div>
+
+          @if (activityError()) {
+            <div class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+              {{ activityError() }}
+            </div>
+          }
 
           @if (profileLoading()) {
             <div class="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
@@ -77,11 +110,41 @@
             <div class="space-y-4">
               <div>
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">History</p>
-                <h3 class="mt-2 text-xl font-extrabold text-slate-900">Quiz attempts will appear here</h3>
+                <h3 class="mt-2 text-xl font-extrabold text-slate-900">Recent generated quizzes</h3>
               </div>
-              <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
-                No attempts are stored yet. Once quiz history is connected, this tab will show recent runs, scores, and quick review links.
-              </div>
+
+              @if (activityLoading()) {
+                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
+                  Loading quiz history...
+                </div>
+              } @else if (!analytics().recentAttempts.length) {
+                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
+                  No quiz attempts yet. Once you finish a generated quiz, the subject, topic, score, and mode will appear here.
+                </div>
+              } @else {
+                <div class="space-y-3">
+                  @for (attempt of analytics().recentAttempts; track attempt.id ?? attempt.completed_at) {
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div class="space-y-1">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <h4 class="text-base font-bold text-slate-900">{{ attempt.topic }}</h4>
+                            <span class="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500 border border-slate-200">{{ attempt.test_mode }}</span>
+                          </div>
+                          <p class="text-sm text-slate-500">{{ attempt.subject }} · {{ attempt.level }} · {{ attempt.total_questions }} questions</p>
+                          <p class="text-xs text-slate-400">Completed {{ attempt.completed_at | date:'MMM d, y • h:mm a' }}</p>
+                        </div>
+
+                        <div class="rounded-2xl bg-white px-4 py-3 text-right border border-slate-200">
+                          <div class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Score</div>
+                          <div class="text-2xl font-black text-slate-900">{{ attemptScorePercent(attempt) }}%</div>
+                          <div class="text-sm text-slate-500">{{ attempt.score }}/{{ attempt.total_questions }} correct</div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
           }
 
@@ -91,9 +154,26 @@
                 <p class="text-xs font-black uppercase tracking-[0.22em] text-slate-400">Saved</p>
                 <h3 class="mt-2 text-xl font-extrabold text-slate-900">Bookmarks and saved quizzes</h3>
               </div>
-              <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
-                Saved quizzes and question bookmarks will land here so users can return to the topics they want to revisit.
-              </div>
+
+              @if (!analytics().savedCount) {
+                <div class="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-500">
+                  Saved quizzes and question bookmarks will land here so users can return to the topics they want to revisit.
+                </div>
+              } @else {
+                <div class="space-y-3">
+                  @for (savedQuiz of savedQuizzes(); track savedQuiz.id ?? savedQuiz.saved_at) {
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <div class="flex items-start justify-between gap-3">
+                        <div>
+                          <h4 class="text-base font-bold text-slate-900">{{ savedQuiz.topic }}</h4>
+                          <p class="mt-1 text-sm text-slate-500">{{ savedQuiz.notes || 'No notes added yet.' }}</p>
+                        </div>
+                        <span class="shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold uppercase tracking-widest text-slate-500 border border-slate-200">{{ savedQuiz.saved_at | date:'MMM d' }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
           }
 
@@ -106,19 +186,32 @@
 
               <div class="grid gap-4 sm:grid-cols-3">
                 <div class="rounded-2xl bg-slate-50 p-4">
-                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Accuracy</div>
-                  <div class="mt-2 text-3xl font-black text-slate-900">--</div>
-                  <div class="mt-1 text-sm text-slate-500">Awaiting quiz attempts</div>
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Practice sessions</div>
+                  <div class="mt-2 text-3xl font-black text-slate-900">{{ analytics().learningCount }}</div>
+                  <div class="mt-1 text-sm text-slate-500">Learning mode quiz runs</div>
                 </div>
                 <div class="rounded-2xl bg-slate-50 p-4">
-                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Weak topics</div>
-                  <div class="mt-2 text-3xl font-black text-slate-900">--</div>
-                  <div class="mt-1 text-sm text-slate-500">Will surface recurring misses</div>
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Exam sessions</div>
+                  <div class="mt-2 text-3xl font-black text-slate-900">{{ analytics().examCount }}</div>
+                  <div class="mt-1 text-sm text-slate-500">Strict test simulations completed</div>
                 </div>
                 <div class="rounded-2xl bg-slate-50 p-4">
-                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Streak</div>
-                  <div class="mt-2 text-3xl font-black text-slate-900">--</div>
-                  <div class="mt-1 text-sm text-slate-500">Daily and weekly stats later</div>
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Weakest topic</div>
+                  <div class="mt-2 text-3xl font-black text-slate-900 truncate">{{ analytics().topWeakTopic }}</div>
+                  <div class="mt-1 text-sm text-slate-500">The topic to revisit next</div>
+                </div>
+              </div>
+
+              <div class="grid gap-3 sm:grid-cols-3">
+                <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Best run</div>
+                  <div class="mt-2 text-xl font-black text-slate-900">{{ analytics().bestScore }}%</div>
+                  <div class="mt-1 text-sm text-slate-500">Highest single-session result</div>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Saved quizzes</div>
+                  <div class="mt-2 text-xl font-black text-slate-900">{{ analytics().savedCount }}</div>
+                  <div class="mt-1 text-sm text-slate-500">Quick returns to revisit later</div>
                 </div>
               </div>
             </div>

@@ -1,8 +1,9 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FirebaseAuthService } from './shared/services/firebase-auth.service';
+import { GuestTrialService } from './shared/services/guest-trial.service';
 
 @Component({
   selector: 'app-initial-landing',
@@ -12,14 +13,13 @@ import { FirebaseAuthService } from './shared/services/firebase-auth.service';
 })
 export class InitialLanding {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private guestTrial = inject(GuestTrialService);
   protected showLanding = false;
   protected isExitingGate = false;
   protected showAccessModal = false;
   protected factCardVersion = 0;
   protected activeFactIndex = 0;
-  protected hasUsedGuestAccess = false;
-  private readonly guestAccessKey = 'quizzie_guest_access_used';
-  private readonly guestQuizCountKey = 'quizzie_guest_quiz_count';
   protected authMode: 'sign-in' | 'register' = 'sign-in';
   protected signInEmail = '';
   protected signInPassword = '';
@@ -37,14 +37,13 @@ export class InitialLanding {
     return this.auth.user()?.email ?? null;
   }
 
+  protected get hasUsedGuestAccess(): boolean {
+    return this.guestTrial.isLimitReached();
+  }
+
   protected async signOut(): Promise<void> {
     try {
       await this.auth.signOut();
-      // clear any UI guest state
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem(this.guestAccessKey);
-        window.localStorage.removeItem(this.guestQuizCountKey);
-      }
     } catch (e) {
       // ignore
     }
@@ -57,9 +56,16 @@ export class InitialLanding {
   ];
 
   constructor() {
-    if (typeof window !== 'undefined') {
-      this.hasUsedGuestAccess = window.localStorage.getItem(this.guestAccessKey) === 'true';
-    }
+    this.guestTrial.ensureGuestTrialInitialized();
+
+    this.route.queryParamMap.subscribe((params) => {
+      const authMode = params.get('auth');
+      if (authMode === 'register' || authMode === 'sign-in') {
+        this.authMode = authMode;
+        this.authError = null;
+        this.showAccessModal = true;
+      }
+    });
   }
 
   protected get activeFact(): string {
@@ -111,7 +117,6 @@ export class InitialLanding {
       return;
     }
 
-    this.markGuestAccessUsed();
     this.closeLoginPrompt();
     this.openLandingWithGateCheck(true);
   }
@@ -197,6 +202,11 @@ export class InitialLanding {
   }
 
   protected skipToStart(): void {
+    if (!this.isSignedIn() && this.hasUsedGuestAccess) {
+      this.showAccessModal = true;
+      return;
+    }
+
     this.openLandingWithGateCheck(true);
   }
 
@@ -205,7 +215,7 @@ export class InitialLanding {
       return;
     }
 
-    if (!force && this.hasUsedGuestAccess) {
+    if (!force && !this.isSignedIn() && this.hasUsedGuestAccess) {
       this.showAccessModal = true;
       return;
     }
@@ -252,19 +262,6 @@ export class InitialLanding {
       gainNode.disconnect();
       audioContext.close().catch(() => undefined);
     };
-  }
-
-  private markGuestAccessUsed(): void {
-    this.hasUsedGuestAccess = true;
-
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    window.localStorage.setItem(this.guestAccessKey, 'true');
-
-    const currentCount = Number(window.localStorage.getItem(this.guestQuizCountKey) ?? '0');
-    window.localStorage.setItem(this.guestQuizCountKey, String(currentCount + 1));
   }
 
   private describeAuthError(error: { message?: string; code?: string; status?: number }): string {

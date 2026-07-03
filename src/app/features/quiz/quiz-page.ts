@@ -1,10 +1,14 @@
-  import { Component, signal, computed, inject, OnInit, ElementRef, ViewChild, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
+  import { Component, signal, computed, effect, inject, OnInit, ElementRef, ViewChild, ViewChildren, QueryList, AfterViewInit} from '@angular/core';
   import { CommonModule } from '@angular/common';
   import { Router } from '@angular/router';
   import { FormsModule } from '@angular/forms';
   import { QuizService } from '../../shared/services/quiz.service';
   import { ConfettiComponent } from '../components/confetti';
   import { ICON_MAP } from '../../shared/utils/icon-map';
+  import { FirebaseAuthService } from '../../shared/services/firebase-auth.service';
+  import { GuestTrialService } from '../../shared/services/guest-trial.service';
+  import { QuizDataService } from '../../shared/services/quiz-data.service';
+  import { QuizAttempt } from '../../shared/models/supabase';
 
   @Component({
       standalone: true,
@@ -16,6 +20,9 @@
   export class QuizPage implements OnInit, AfterViewInit{
     private router = inject(Router);
     private quizService = inject(QuizService);
+    private auth = inject(FirebaseAuthService);
+    private guestTrial = inject(GuestTrialService);
+    private data = inject(QuizDataService);
 
 
     ICON_MAP = ICON_MAP;
@@ -29,6 +36,10 @@
     selectedAnswer = signal<string | null>(null);
     userInput = signal('');
     userAnswers = signal<Record<string, string | null>>({});
+    questionAttempts = signal<Record<string, number>>({});
+    questionAnswerHistory = signal<Record<string, string[]>>({});
+    currentQuestionResolved = signal(false);
+    feedbackMessage = signal<string | null>(null);
 
     questionImage = signal<string | null>(null);
     nextImage = signal<string | null>(null);
@@ -44,12 +55,29 @@
 
     score = signal(0);
     isFinished = signal(false);
+    hasSavedAttempt = signal(false);
+    trialStatus = computed(() => (this.auth.user() ? null : this.guestTrial.getStatusLabel()));
     timer = signal<number | null>(null);
     timeLeft = signal<number>(0);
     timerInterval: any;
 
     isLearningMode = computed(() => this.quizService.testMode() === 'learning');
     isExamMode = computed(() => this.quizService.testMode() === 'exam');
+    isAnswerLocked = computed(() => {
+      if (this.isExamMode()) {
+        return this.currentQuestionResolved();
+      }
+
+      return this.currentQuestionResolved();
+    });
+    currentQuestionAttemptCount = computed(() => {
+      const question = this.currentQuestion();
+      if (!question) {
+        return 0;
+      }
+
+      return this.questionAttempts()[question.id] ?? 0;
+    });
 
     currentQuestion = computed(() => this.questions()?.[this.currentIndex()]);
 
@@ -81,6 +109,7 @@
           this.router.navigateByUrl('/');
           return;
         }
+        this.resetQuestionState();
         this.buildMediaPlan();
         this.applyMediaForCurrentQuestion();
         this.prefetchNextImage();
@@ -97,35 +126,145 @@
       this.muteAllVideos();
       this.allVideos?.changes.subscribe(() => this.muteAllVideos());
     }
-    selectOption(option: string) {
-      if (this.selectedAnswer()) return;
-      this.selectedAnswer.set(option);
-      this.saveAnswer(option);
 
-      if (option === this.currentQuestion().answer) {
-        this.score.update(s => s + 1);
-      }
+    constructor() {
+      effect(() => {
+        if (!this.isFinished() || this.hasSavedAttempt()) {
+          return;
+        }
+
+        const user = this.auth.user();
+        if (!user) {
+          this.hasSavedAttempt.set(true);
+          return;
+        }
+
+        const questions = this.questions() || [];
+        if (!questions.length) {
+          this.hasSavedAttempt.set(true);
+          return;
+        }
+
+        const questionReviews = questions.map((question: any) => {
+          const attempts = this.questionAttempts()[question.id] ?? 0;
+          const history = this.questionAnswerHistory()[question.id] ?? [];
+          const lastAnswer = history[history.length - 1] ?? null;
+          const firstAnswer = history[0] ?? null;
+          const firstAttemptCorrect = Boolean(firstAnswer) && String(firstAnswer).trim().toLowerCase() === String(question.answer ?? '').trim().toLowerCase();
+
+          return {
+            id: String(question.id),
+            question: String(question.question ?? ''),
+            answer: String(question.answer ?? ''),
+            userAnswer: lastAnswer,
+            correct: this.isAnswerCorrect(question),
+            firstAttemptCorrect,
+            attemptNumber: attempts,
+            subject: String(question.subject ?? ''),
+          };
+        });
+
+        const timeTaken = this.timer() ? Math.max(0, (this.timer() ?? 0) - this.timeLeft()) : null;
+        const attempt: QuizAttempt = {
+          user_id: user.uid,
+          quiz_id: `${Date.now()}`,
+          topic: this.quizService.quizTopic() || this.currentQuestion()?.question || 'Quiz',
+          subject: this.quizService.quizSubject() || this.currentQuestion()?.subject || 'General',
+          level: this.quizService.quizLevel() || 'Unknown',
+          mode: this.quizService.testMode(),
+          attempt_number: Object.values(this.questionAttempts()).reduce((sum, count) => sum + count, 0),
+          test_mode: this.quizService.testMode(),
+          score: this.score(),
+          total_questions: questions.length,
+          time_taken: timeTaken,
+          completed_at: new Date().toISOString(),
+          review_data: {
+            mode: this.quizService.testMode(),
+            attemptNumber: Object.values(this.questionAttempts()).reduce((sum, count) => sum + count, 0),
+            questions: questions.map((question: any) => ({
+              id: question.id,
+              question: question.question,
+              answer: question.answer,
+              userAnswer: this.getUserAnswer(question),
+              correct: this.isAnswerCorrect(question),
+              firstAttemptCorrect: questionReviews.find((review: { id: string; firstAttemptCorrect: boolean }) => review.id === String(question.id))?.firstAttemptCorrect ?? false,
+              attemptNumber: this.questionAttempts()[question.id] ?? 0,
+              subject: question.subject,
+            })),
+          },
+        };
+
+        this.hasSavedAttempt.set(true);
+        void this.data.saveQuizAttempt(attempt).catch(() => {
+          this.hasSavedAttempt.set(false);
+        });
+      });
+    }
+
+    selectOption(option: string) {
+      this.handleAnswer(option);
     }
 
     submitTextAnswer() {
-      const userAnswer = this.userInput().trim().toLowerCase();
-      const correctAnswer = this.currentQuestion().answer.trim().toLowerCase();
-
-      this.selectedAnswer.set(this.userInput());
-      this.saveAnswer(this.userInput());
-
-      if(userAnswer === correctAnswer) {
-          this.score.update(s => s +1 );
-      }
+      this.handleAnswer(this.userInput());
     }
 
-    private saveAnswer(answer: string): void {
+    private handleAnswer(answer: string): void {
       const question = this.currentQuestion();
       if (!question) return;
+
+      if (this.currentQuestionResolved()) {
+        return;
+      }
+
+      const questionId = String(question.id);
+      const normalizedAnswer = answer.trim().toLowerCase();
+      const normalizedCorrect = String(question.answer ?? '').trim().toLowerCase();
+      const nextAttemptCount = (this.questionAttempts()[questionId] ?? 0) + 1;
+
+      this.questionAttempts.update(attempts => ({
+        ...attempts,
+        [questionId]: nextAttemptCount,
+      }));
+
+      this.questionAnswerHistory.update(history => ({
+        ...history,
+        [questionId]: [...(history[questionId] ?? []), answer],
+      }));
+
+      this.selectedAnswer.set(answer);
+      this.userInput.set(answer);
       this.userAnswers.update(answers => ({
         ...answers,
-        [question.id]: answer
+        [questionId]: answer,
       }));
+
+      if (this.isExamMode()) {
+        if (normalizedAnswer === normalizedCorrect) {
+          this.score.update(s => s + 1);
+          this.feedbackMessage.set('Answer recorded. Continue to the next question.');
+        } else {
+          this.feedbackMessage.set('Answer recorded. Continue to the next question.');
+        }
+
+        this.currentQuestionResolved.set(true);
+        return;
+      }
+
+      if (normalizedAnswer === normalizedCorrect) {
+        this.score.update(s => s + 1);
+        this.feedbackMessage.set('Correct. Nice work.');
+        this.currentQuestionResolved.set(true);
+        return;
+      }
+
+      if (nextAttemptCount >= 2) {
+        this.feedbackMessage.set('Answer revealed after 2 tries.');
+        this.currentQuestionResolved.set(true);
+        return;
+      }
+
+      this.feedbackMessage.set('Not quite. Try again.');
     }
 
     isAnswerCorrect(question: any): boolean {
@@ -139,10 +278,16 @@
     }
 
     nextQuestion() {
+      if (!this.currentQuestionResolved()) {
+        return;
+      }
+
       if (this.currentIndex() < this.questions().length - 1) {
         this.currentIndex.update(i => i + 1);
         this.selectedAnswer.set(null);
         this.userInput.set('');
+        this.currentQuestionResolved.set(false);
+        this.feedbackMessage.set(null);
         this.applyMediaForCurrentQuestion();
         this.prefetchNextImage();
 
@@ -157,7 +302,22 @@
 
     restart() {
     this.quizService.currentQuiz.set(null);
+    if (this.auth.user()) {
+      this.router.navigateByUrl('/quizzie');
+      return;
+    }
+
     this.router.navigateByUrl('/');
+    }
+
+    private resetQuestionState(): void {
+      this.selectedAnswer.set(null);
+      this.userInput.set('');
+      this.currentQuestionResolved.set(false);
+      this.feedbackMessage.set(null);
+      this.questionAttempts.set({});
+      this.questionAnswerHistory.set({});
+      this.userAnswers.set({});
     }
 
     startTimer() {

@@ -14,6 +14,8 @@ type QuizAttemptRecord = {
   topic: string;
   subject: string;
   level: string;
+  mode: string;
+  attempt_number: number;
   test_mode: string;
   score: number;
   total_questions: number;
@@ -68,6 +70,8 @@ async function ensureSchema(): Promise<void> {
           topic text NOT NULL,
           subject text NOT NULL,
           level text NOT NULL,
+          mode text NOT NULL DEFAULT 'learning',
+          attempt_number integer NOT NULL DEFAULT 1,
           test_mode text NOT NULL,
           score integer NOT NULL,
           total_questions integer NOT NULL,
@@ -75,6 +79,16 @@ async function ensureSchema(): Promise<void> {
           completed_at timestamptz NOT NULL,
           review_data jsonb NOT NULL DEFAULT '{}'::jsonb
         )
+      `);
+
+      await pool.query('ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS mode text');
+      await pool.query('ALTER TABLE quiz_attempts ADD COLUMN IF NOT EXISTS attempt_number integer');
+      await pool.query(`
+        UPDATE quiz_attempts
+        SET
+          mode = COALESCE(mode, test_mode, 'learning'),
+          attempt_number = COALESCE(attempt_number, 1)
+        WHERE mode IS NULL OR attempt_number IS NULL
       `);
 
       await pool.query(`
@@ -138,6 +152,8 @@ export async function listQuizAttempts(userId: string, limit = 20): Promise<Quiz
         topic,
         subject,
         level,
+        mode,
+        attempt_number,
         test_mode,
         score,
         total_questions,
@@ -167,6 +183,8 @@ export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizA
         topic,
         subject,
         level,
+        mode,
+        attempt_number,
         test_mode,
         score,
         total_questions,
@@ -185,8 +203,10 @@ export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizA
         $8,
         $9,
         $10,
-        COALESCE($11::timestamptz, now()),
-        COALESCE($12::jsonb, '{}'::jsonb)
+        $11,
+        $12,
+        COALESCE($13::timestamptz, now()),
+        COALESCE($14::jsonb, '{}'::jsonb)
       )
       ON CONFLICT (id)
       DO UPDATE SET
@@ -194,6 +214,8 @@ export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizA
         topic = EXCLUDED.topic,
         subject = EXCLUDED.subject,
         level = EXCLUDED.level,
+        mode = EXCLUDED.mode,
+        attempt_number = EXCLUDED.attempt_number,
         test_mode = EXCLUDED.test_mode,
         score = EXCLUDED.score,
         total_questions = EXCLUDED.total_questions,
@@ -207,6 +229,8 @@ export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizA
         topic,
         subject,
         level,
+        mode,
+        attempt_number,
         test_mode,
         score,
         total_questions,
@@ -221,6 +245,8 @@ export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizA
       attempt.topic,
       attempt.subject,
       attempt.level,
+      attempt.mode,
+      attempt.attempt_number,
       attempt.test_mode,
       attempt.score,
       attempt.total_questions,

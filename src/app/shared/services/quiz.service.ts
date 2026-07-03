@@ -11,14 +11,20 @@ export class QuizService {
     isLoading = signal<boolean>(false);
     errorMessage = signal<string | null>(null);
     quizTimer = signal<number | null>(null);
+    quizTopic = signal<string | null>(null);
     quizSubject = signal<string | null>(null);
+    quizLevel = signal<string | null>(null);
+    quizSubLevel = signal<string | null>(null);
     testMode = signal<TestMode>('learning');
 
     generateQuiz(settings: QuizSettings) {
         this.isLoading.set(true);
         this.errorMessage.set(null);
         this.quizTimer.set(settings.timer ?? null)
+        this.quizTopic.set(settings.topic ?? null);
         this.quizSubject.set(settings.subject ?? null);
+        this.quizLevel.set(settings.level ?? null);
+        this.quizSubLevel.set(settings.subLevel ?? null);
         this.testMode.set(settings.testMode ?? 'learning');
 
         return this.http.post<any>('/api/generate', settings).pipe(

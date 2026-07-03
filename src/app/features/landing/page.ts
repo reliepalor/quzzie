@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { AcademicLevel, LEVELS, QuizSettings, TestMode, TestType } from '../../shared/models/quiz';
 import { FirebaseAuthService } from '../../shared/services/firebase-auth.service';
+import { GuestTrialService } from '../../shared/services/guest-trial.service';
 import { QuizService } from '../../shared/services/quiz.service';
 import { LEVEL_YEAR_CONTENT } from '../../shared/models/quiz';
 
@@ -20,6 +21,7 @@ export class LandingPage {
   private quizService = inject(QuizService);
   private router = inject(Router);
   private auth = inject(FirebaseAuthService);
+  private guestTrial = inject(GuestTrialService);
 
   isLoading = signal(false);
   validationMessage = signal<string | null>(null);
@@ -40,6 +42,9 @@ export class LandingPage {
 
   showFailedGenerationModal = signal(false);
   showDifficultyModal = signal(false);
+  showGuestLimitModal = signal(false);
+  guestTrialStatus = computed(() => this.guestTrial.getStatusLabel());
+  guestTrialRemaining = computed(() => this.guestTrial.getRemainingLabel());
 
 
   difficultyMessage = signal<string | null>(null);
@@ -50,12 +55,15 @@ export class LandingPage {
     const user = this.signedInUser();
     return user?.displayName || user?.email?.split('@')[0] || 'Profile';
   });
+  protected readonly avatarUrl = computed(() => this.signedInUser()?.photoURL ?? null);
 
   @ViewChild('dropdownRef') dropdownRef!: ElementRef;
   @ViewChild('subjectDropdownRef') subjectDropdownRef!: ElementRef;
   @ViewChild('topicDropdownRef') topicDropdownRef!: ElementRef;
+  @ViewChild('accountMenuRef') accountMenuRef!: ElementRef;
   
   dropdownOpen = signal(false);
+  accountMenuOpen = signal(false);
   subjectDropdownOpen = signal(false);
   topicDropdownOpen = signal(false);
   subjectSearch = signal('');
@@ -101,6 +109,41 @@ export class LandingPage {
 
   selectTestMode(mode: TestMode) {
     this.selectedTestMode.set(mode);
+  }
+
+  toggleAccountMenu() {
+    this.accountMenuOpen.update(v => !v);
+  }
+
+  closeAccountMenu() {
+    this.accountMenuOpen.set(false);
+  }
+
+  goToProfile() {
+    this.closeAccountMenu();
+
+    if (this.signedInUser()) {
+      void this.router.navigateByUrl('/account');
+      return;
+    }
+
+    void this.router.navigate(['/'], { queryParams: { auth: 'sign-in' } });
+  }
+
+  async signOut(): Promise<void> {
+    this.closeAccountMenu();
+
+    try {
+      await this.auth.signOut();
+      void this.router.navigateByUrl('/');
+    } catch {
+      // ignore sign-out errors for the dropdown flow
+    }
+  }
+
+  openAuthEntry() {
+    this.closeAccountMenu();
+    void this.router.navigate(['/'], { queryParams: { auth: 'sign-in' } });
   }
 
   
@@ -251,6 +294,11 @@ export class LandingPage {
         this.validationMessage.set('Please enter a topic before generating a quiz.');
         return;
       }
+
+      if (!this.auth.user() && !this.guestTrial.canUseAnotherGeneration()) {
+        this.showGuestLimitModal.set(true);
+        return;
+      }
       
 
       // Set loading to true immediately
@@ -310,6 +358,10 @@ export class LandingPage {
     this.quizService.generateQuiz(settings).subscribe({
 
       next: (result) => {
+        if (!this.auth.user()) {
+          this.guestTrial.consumeOneGeneration();
+        }
+
         this.quizService.currentQuiz.set(result.quiz);
         this.router.navigate(['/play']);
       },
@@ -361,6 +413,15 @@ export class LandingPage {
     this.isLoading.set(false);
   }
 
+  closeGuestLimitModal() {
+    this.showGuestLimitModal.set(false);
+  }
+
+  openLoginRegisterModal() {
+    this.showGuestLimitModal.set(false);
+    void this.router.navigate(['/'], { queryParams: { auth: 'sign-in' } });
+  }
+
   //-- TIMER 
   timerPresets = [
     { label: '5 min',  seconds: 300  },
@@ -410,6 +471,10 @@ export class LandingPage {
   onOutsideClick(event: MouseEvent) {
     const target = event.target as Node;
 
+    if (this.accountMenuRef && !this.accountMenuRef.nativeElement.contains(target)) {
+      this.accountMenuOpen.set(false);
+    }
+
     if (this.dropdownRef && !this.dropdownRef.nativeElement.contains(target)) {
       this.dropdownOpen.set(false);
     }
@@ -421,5 +486,10 @@ export class LandingPage {
     if (this.topicDropdownRef && !this.topicDropdownRef.nativeElement.contains(target)) {
       this.topicDropdownOpen.set(false);
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    this.closeAccountMenu();
   }
 }

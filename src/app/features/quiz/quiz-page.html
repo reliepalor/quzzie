@@ -12,7 +12,7 @@
 </style>
 
 <div class="min-h-screen bg-[#fafbfd] text-slate-900 flex items-start justify-center px-5 pt-10 pb-20">
-  <div class="max-w-[560px] w-full flex flex-col gap-4">
+  <div class="max-w-140 w-full flex flex-col gap-4">
 
     @if (!isFinished() && currentQuestion()) {
 
@@ -25,7 +25,7 @@
       </div>
 
       <!-- iamge generation -->
-      <div class="w-full h-[220px] mb-4 rounded-xl overflow-hidden flex items-center justify-center bg-gray-50">
+      <div class="w-full h-55 mb-4 rounded-xl overflow-hidden flex items-center justify-center bg-gray-50">
 
         <!-- Loading: thinking.png -->
         @if (imageLoading() && !questionImage()) {
@@ -99,21 +99,26 @@
             Question {{ currentIndex() + 1 }}
           </span>
           <h2 class="text-xl font-semibold leading-snug tracking-tight text-slate-900">{{ currentQuestion().question }}</h2>
+          @if (isLearningMode() && !currentQuestionResolved()) {
+            <p class="text-xs font-semibold uppercase tracking-widest text-blue-500">
+              Attempt {{ currentQuestionAttemptCount() + 1 }} of 2
+            </p>
+          }
         </header>
 
         <!-- Multiple choice -->
         @if (currentQuestion().options && currentQuestion().options.length > 0) {
           <div class="flex flex-col gap-2">
             @for (opt of currentQuestion().options; track opt; let i = $index) {
-              <button (click)="selectOption(opt)" [disabled]="!!selectedAnswer()"
+              <button (click)="selectOption(opt)" [disabled]="isAnswerLocked()"
                 class="flex items-center gap-3 px-4 py-3.5 rounded-xl border-[1.5px] text-left transition-all duration-150 disabled:cursor-default"
                 [class]="
-                  !selectedAnswer() ? 'border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/40 hover:translate-x-0.5' :
+                  !isAnswerLocked() ? (selectedAnswer() === opt ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-blue-50/40 hover:translate-x-0.5') :
                   isLearningMode() && opt === currentQuestion().answer ? 'border-emerald-400 bg-emerald-50' :
                   isLearningMode() && selectedAnswer() === opt ? 'border-red-400 bg-red-50' :
                   isExamMode() && selectedAnswer() === opt ? 'border-blue-400 bg-blue-50' :
                   'border-slate-100 bg-slate-50 opacity-50'">
-                <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0 mono transition-colors"
+                <span class="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0 mono transition-colors"
                   [class]="
                     !selectedAnswer() ? 'bg-slate-200 text-slate-500' :
                     isLearningMode() && opt === currentQuestion().answer ? 'bg-emerald-500 text-white' :
@@ -123,7 +128,7 @@
                   {{ 'ABCD'[i] }}
                 </span>
                 <span class="flex-1 text-sm font-medium text-slate-700">{{ opt }}</span>
-                <span class="flex-shrink-0 w-4 h-4">
+                <span class="shrink-0 w-4 h-4">
                   @if (selectedAnswer() && isLearningMode() && opt === currentQuestion().answer) {
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <circle cx="8" cy="8" r="7" fill="#10b981"/>
@@ -149,7 +154,7 @@
                 <path d="M2 7.5h11M7.5 2v11" stroke="#94a3b8" stroke-width="1.4" stroke-linecap="round"/>
               </svg>
               <input [(ngModel)]="userInput"
-                [disabled]="!!selectedAnswer()"
+                [disabled]="isAnswerLocked()"
                 (keyup.enter)="submitTextAnswer()"
                 type="text"
                 placeholder="Type your answer…"
@@ -167,8 +172,14 @@
           </div>
         }
 
+        @if (feedbackMessage()) {
+          <div class="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700">
+            {{ feedbackMessage() }}
+          </div>
+        }
+
         <!-- Answer reveal -->
-        @if (selectedAnswer() && isLearningMode()) {
+        @if (currentQuestionResolved() && isLearningMode()) {
           <div class="reveal-up border-t border-slate-100 pt-4 flex flex-col gap-3">
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col gap-1.5">
               <span class="flex items-center gap-1.5 mono text-[11px] font-semibold uppercase tracking-widest text-blue-500">
@@ -193,7 +204,7 @@
           </div>
         }
 
-        @if (selectedAnswer() && isExamMode()) {
+        @if (currentQuestionResolved() && isExamMode()) {
           <div class="reveal-up border-t border-slate-100 pt-4 flex flex-col gap-3">
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3">
               <div>
@@ -264,6 +275,13 @@
           </svg>
           Try Another Quiz
         </button>
+
+        @if (trialStatus()) {
+          <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
+            <span class="font-semibold text-slate-700">Guest trial status:</span>
+            <span class="ml-1 font-black text-slate-900">{{ trialStatus() }}</span>
+          </div>
+        }
 
         @if (isExamMode()) {
           <div class="w-full mt-4 bg-white border border-slate-200 rounded-2xl p-5 flex flex-col gap-4">
