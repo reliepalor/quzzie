@@ -1,15 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "api/*.js": {
-      "runtime": "vercel-nodejs@20"
-    }
-  },
   "rewrites": [
     { "source": "/api/profile/:userId", "destination": "/api/profile?userId=:userId" },
     { "source": "/api/quiz-attempts/:userId", "destination": "/api/quiz-attempts?userId=:userId" },
     { "source": "/api/saved-quizzes/:userId", "destination": "/api/saved-quizzes?userId=:userId" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

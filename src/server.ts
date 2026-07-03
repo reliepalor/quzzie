@@ -15,7 +15,7 @@ import {
   saveQuizAttempt,
   saveQuizBookmark,
   upsertProfile
-} from "../backend/services/neonService";
+} from "../backend/services/neonService.d";
 
 const app = express();
 app.use(express.json());

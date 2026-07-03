@@ -2,6 +2,9 @@
   "name": "quizzie",
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "ng": "ng",
     "start": "concurrently -k \"npm run start:api\" \"npm run start:web\"",

@@ -1,38 +1,5 @@
 import { Pool } from 'pg';
 
-type ProfileRecord = {
-  user_id: string;
-  display_name: string | null;
-  avatar_url: string | null;
-  created_at: string;
-};
-
-type QuizAttemptRecord = {
-  id?: string;
-  user_id: string;
-  quiz_id?: string | null;
-  topic: string;
-  subject: string;
-  level: string;
-  mode: string;
-  attempt_number: number;
-  test_mode: string;
-  score: number;
-  total_questions: number;
-  time_taken: number | null;
-  completed_at: string;
-  review_data: unknown;
-};
-
-type SavedQuizRecord = {
-  id?: string;
-  user_id: string;
-  quiz_id: string | null;
-  topic: string;
-  saved_at: string;
-  notes: string | null;
-};
-
 const connectionString = process.env['DATABASE_URL'];
 
 if (!connectionString) {
@@ -46,9 +13,9 @@ const pool = new Pool({
   },
 });
 
-let schemaReady: Promise<void> | null = null;
+let schemaReady = null;
 
-async function ensureSchema(): Promise<void> {
+async function ensureSchema() {
   if (!schemaReady) {
     schemaReady = (async () => {
       await pool.query('CREATE EXTENSION IF NOT EXISTS pgcrypto');
@@ -110,10 +77,10 @@ async function ensureSchema(): Promise<void> {
   return schemaReady;
 }
 
-export async function getProfile(userId: string): Promise<ProfileRecord | null> {
+export async function getProfile(userId) {
   await ensureSchema();
 
-  const result = await pool.query<ProfileRecord>(
+  const result = await pool.query(
     'SELECT user_id, display_name, avatar_url, created_at::text AS created_at FROM profiles WHERE user_id = $1 LIMIT 1',
     [userId]
   );
@@ -121,10 +88,10 @@ export async function getProfile(userId: string): Promise<ProfileRecord | null> 
   return result.rows[0] ?? null;
 }
 
-export async function upsertProfile(profile: ProfileRecord): Promise<ProfileRecord> {
+export async function upsertProfile(profile) {
   await ensureSchema();
 
-  const result = await pool.query<ProfileRecord>(
+  const result = await pool.query(
     `
       INSERT INTO profiles (user_id, display_name, avatar_url, created_at)
       VALUES ($1, $2, $3, COALESCE($4::timestamptz, now()))
@@ -140,10 +107,10 @@ export async function upsertProfile(profile: ProfileRecord): Promise<ProfileReco
   return result.rows[0];
 }
 
-export async function listQuizAttempts(userId: string, limit = 20): Promise<QuizAttemptRecord[]> {
+export async function listQuizAttempts(userId, limit = 20) {
   await ensureSchema();
 
-  const result = await pool.query<QuizAttemptRecord>(
+  const result = await pool.query(
     `
       SELECT
         id::text AS id,
@@ -171,10 +138,10 @@ export async function listQuizAttempts(userId: string, limit = 20): Promise<Quiz
   return result.rows;
 }
 
-export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizAttemptRecord> {
+export async function saveQuizAttempt(attempt) {
   await ensureSchema();
 
-  const result = await pool.query<QuizAttemptRecord>(
+  const result = await pool.query(
     `
       INSERT INTO quiz_attempts (
         id,
@@ -259,10 +226,10 @@ export async function saveQuizAttempt(attempt: QuizAttemptRecord): Promise<QuizA
   return result.rows[0];
 }
 
-export async function listSavedQuizzes(userId: string): Promise<SavedQuizRecord[]> {
+export async function listSavedQuizzes(userId) {
   await ensureSchema();
 
-  const result = await pool.query<SavedQuizRecord>(
+  const result = await pool.query(
     `
       SELECT
         id::text AS id,
@@ -281,10 +248,10 @@ export async function listSavedQuizzes(userId: string): Promise<SavedQuizRecord[
   return result.rows;
 }
 
-export async function saveQuizBookmark(entry: SavedQuizRecord): Promise<SavedQuizRecord> {
+export async function saveQuizBookmark(entry) {
   await ensureSchema();
 
-  const result = await pool.query<SavedQuizRecord>(
+  const result = await pool.query(
     `
       INSERT INTO saved_quizzes (id, user_id, quiz_id, topic, saved_at, notes)
       VALUES (COALESCE($1::uuid, gen_random_uuid()), $2, $3, $4, COALESCE($5::timestamptz, now()), $6)
