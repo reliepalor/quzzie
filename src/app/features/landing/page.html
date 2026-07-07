@@ -4,30 +4,30 @@
     (click)="toggleAccountMenu()"
     aria-haspopup="menu"
     [attr.aria-expanded]="accountMenuOpen()"
-    class="group flex items-center gap-3 rounded-full border border-slate-200 bg-white/90 px-3 py-2 backdrop-blur-xl shadow-[0_12px_35px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_16px_45px_rgba(59,130,246,0.16)]">
-    <span class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-blue-600 to-cyan-500 text-sm font-black text-white ring-4 ring-white/80">
+    class="group flex items-center gap-3 rounded-full border border-[var(--color-line)] bg-white/90 px-3 py-2 backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-[var(--color-accent)]">
+    <span class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[var(--color-accent-soft)] text-sm font-bold text-[var(--color-accent)] ring-4 ring-white/80">
       @if (avatarUrl()) {
         <img [src]="avatarUrl()!" alt="Profile photo" class="h-full w-full object-cover">
       } @else {
         {{ signedInUser() ? profileLabel()[0] : 'Q' }}
       }
-      <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400"></span>
+      <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-[var(--color-accent)]"></span>
     </span>
     <span class="hidden sm:block text-left leading-tight">
-      <span class="block text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Menu</span>
+      <span class="block text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--color-ink-soft)]">Menu</span>
       {{ signedInUser() ? profileLabel() : 'Account' }}
     </span>
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="text-slate-400 transition-transform duration-200" [class.rotate-180]="accountMenuOpen()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" class="text-[var(--color-ink-soft)] transition-transform duration-200" [class.rotate-180]="accountMenuOpen()">
       <path d="M2 4.25l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </button>
 
   @if (accountMenuOpen()) {
-    <div class="absolute right-0 mt-2 w-60 overflow-hidden rounded-3xl border border-slate-200 bg-white/95 backdrop-blur-xl shadow-[0_24px_80px_rgba(15,23,42,0.14)] animate-in fade-in slide-in-from-top-2 duration-150">
-      <div class="px-4 py-4 border-b border-slate-100 bg-linear-to-br from-slate-50 to-white">
-        <p class="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Quick Access</p>
+    <div class="absolute right-0 mt-2 w-60 overflow-hidden rounded-[20px] border border-[var(--color-line)] bg-white/95 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
+      <div class="px-4 py-4 border-b border-[var(--color-line)] bg-[var(--color-paper)]">
+        <p class="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--color-ink-soft)]">Quick access</p>
         <div class="mt-1 flex items-center gap-3">
-          <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 to-cyan-500 text-sm font-black text-white ring-1 ring-slate-200">
+          <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl bg-[var(--color-accent-soft)] text-sm font-bold text-[var(--color-accent)] ring-1 ring-[var(--color-line)]">
             @if (avatarUrl()) {
               <img [src]="avatarUrl()!" alt="Profile photo" class="h-full w-full object-cover">
             } @else {
@@ -35,8 +35,8 @@
             }
           </span>
           <div>
-            <p class="text-sm font-semibold text-slate-900">{{ signedInUser() ? profileLabel() : 'Guest account' }}</p>
-            <p class="text-xs text-slate-500">
+            <p class="text-sm font-semibold">{{ signedInUser() ? profileLabel() : 'Guest account' }}</p>
+            <p class="text-xs text-[var(--color-ink-soft)]">
               {{ signedInUser() ? (signedInUser()?.email || 'Signed in') : 'Log in to save your progress' }}
             </p>
           </div>
@@ -46,8 +46,8 @@
       <button
         type="button"
         (click)="goToProfile()"
-        class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-        <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+        class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold transition-colors hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]">
+        <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
             <circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
             <path d="M3.5 15c0-2.8 2.5-4.5 5.5-4.5s5.5 1.7 5.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -59,8 +59,8 @@
       <button
         type="button"
         (click)="signedInUser() ? signOut() : openAuthEntry()"
-        class="flex w-full items-center gap-3 border-t border-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-        <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+        class="flex w-full items-center gap-3 border-t border-[var(--color-line)] px-4 py-3 text-left text-sm font-semibold transition-colors hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]">
+        <span class="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
           @if (signedInUser()) {
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path d="M6.5 4.5H4.25A1.75 1.75 0 0 0 2.5 6.25v5.5a1.75 1.75 0 0 0 1.75 1.75H6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -73,552 +73,575 @@
             </svg>
           }
         </span>
-        <span>{{ signedInUser() ? 'Sign out' : 'Login / Register' }}</span>
+        <span>{{ signedInUser() ? 'Sign out' : 'Log in or register' }}</span>
       </button>
     </div>
   }
 </div>
 
-<div class="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900 pb-20">
-  <main class="max-w-2xl mx-auto space-y-6">
-    
-    <header class="text-center py-6">
-      <h1 class="text-5xl font-black tracking-tight text-blue-600">Jaya</h1>
-      <p class="text-slate-500 font-medium mt-1">Just as your AI</p>
-      <p class="text-slate-500 font-medium  ">Your personalized AI study partner.</p>
-    </header>
+<div class="min-h-screen bg-[var(--color-paper)] p-4 md:p-8 pb-20">
+  <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row lg:items-start">
+    <main class="min-w-0 flex-1 max-w-2xl mx-auto lg:mx-0 space-y-6">
 
-    <!-- MODE SECTION -->
-    <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-      <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-        <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
-        Test Mode Selection
-      </h2>
+      <header class="text-center py-6">
+        <h1 class="font-display text-5xl font-bold text-[var(--color-ink)]">Jaya</h1>
+        <p class="text-[var(--color-ink-soft)] font-medium mt-1">Just as your AI</p>
+        <p class="text-[var(--color-ink-soft)] font-medium">Your personalized AI study partner.</p>
+      </header>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        @for (mode of testModes; track mode.id) {
-          <button
-            type="button"
-            (click)="selectTestMode(mode.id)"
-            [class.border-blue-600]="selectedTestMode() === mode.id"
-            [class.bg-blue-50]="selectedTestMode() === mode.id"
-            class="p-4 rounded-2xl border-2 border-slate-100 hover:border-blue-200 transition-all text-left group">
-            <span class="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400 mb-2">
-              <span class="text-base">{{ mode.icon }}</span>
-              {{ mode.shortLabel }}
-            </span>
-            <span class="block font-bold text-slate-900">{{ mode.label }}</span>
-            <span class="text-xs text-slate-500 mt-1 block">
-              @if (mode.id === 'learning') {
-                Immediate feedback and step-by-step explanations.
-              } @else {
-                Quiet simulation with results at the end.
-              }
-            </span>
-          </button>
-        }
-      </div>
-
-      <div class="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 text-sm leading-relaxed text-slate-700">
-        {{ testModeExplanation() }}
-      </div>
-    </section>
-
-    <!--LEVEL SECTION -->
-    <section class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-      <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-        <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
-        Choose your Level
-      </h2>
-      <div class="grid grid-cols-2 gap-3">
-        @for (lvl of allLevels; track lvl.id) {
-          <button (click)="selectLevel(lvl)"
-            [class.border-blue-600]="selectedLevel()?.id === lvl.id"
-            [class.bg-blue-50]="selectedLevel()?.id === lvl.id"
-            class="p-4 rounded-2xl border-2 border-slate-100 hover:border-blue-200 transition-all text-left group">
-            <span class="block font-bold">{{ lvl.name }}</span>
-            <span class="text-xs text-slate-400">{{ lvl.subLevels[0] }} to {{ lvl.subLevels[lvl.subLevels.length-1] }}</span>
-          </button>
-        }
-      </div>
-
-      @if (selectedLevel(); as active) {
-        <div class="mt-6 pt-6 border-t border-slate-100 animate-in fade-in slide-in-from-top-2">
-          <p class="text-xs font-black text-slate-400 mb-3 uppercase tracking-widest">Select Grade / Year</p>
-          <div class="flex flex-wrap gap-2">
-            @for (sub of active.subLevels; track sub) {
-              <button (click)="setSubLevel(sub)"
-                [class]="selectedSubLevel() === sub ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-                class="px-4 py-2 rounded-full text-sm font-bold transition-all">
-                {{ sub }}
-              </button>
-            }
-          </div>
-        </div>
-      }
-    </section>
-
-    <!-- SOURCE AND TOPIC SECTION-->
-    @if (selectedSubLevel()) {
-      <section [formGroup]="quizForm" class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-bottom-4">
-        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-          <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
-          Source & Topic
+      <!-- MODE SECTION -->
+      <section class="bg-white p-6 rounded-[20px] border border-[var(--color-line)]">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 font-display">
+          <span class="bg-[var(--color-ink)] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-mono">1</span>
+          Test mode selection
         </h2>
-        
-        <div class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="relative" #subjectDropdownRef>
-              <label class="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">Subject</label>
-              <button
-                type="button"
-                (click)="toggleSubjectDropdown()"
-                class="w-full p-4 pr-11 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 text-left flex items-center justify-between gap-2 transition-all">
-                <span [class]="quizForm.value.subject ? 'text-slate-800 font-semibold' : 'text-slate-400 font-medium'">
-                  {{ quizForm.value.subject || 'Select or type a subject' }}
-                </span>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-slate-500 transition-transform" [class.rotate-180]="subjectDropdownOpen()">
-                  <path d="M3 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
 
-              @if (quizForm.value.subject) {
-                <button
-                  type="button"
-                  (click)="clearSubject($event)"
-                  class="absolute right-9 top-9.5 h-7 w-7 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300 hover:text-slate-800 transition-colors flex items-center justify-center z-10"
-                  aria-label="Clear selected subject">
-                  <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                    <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                  </svg>
-                </button>
-              }
-
-              @if (subjectDropdownOpen()) {
-                <div class="absolute z-20 mt-2 w-full bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/70 p-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <input
-                    type="text"
-                    [value]="subjectSearch()"
-                    (input)="onSubjectSearchInput($event)"
-                    placeholder="Search or type custom subject"
-                    class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm font-medium">
-
-                  <div class="max-h-44 overflow-y-auto space-y-1 pr-1">
-                    @for (s of filteredSubjects(); track s) {
-                      <button
-                        type="button"
-                        (click)="selectSubject(s)"
-                        [class]="quizForm.value.subject === s ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-transparent text-slate-700 hover:bg-slate-50'"
-                        class="w-full text-left px-3 py-2 rounded-xl border text-sm font-semibold transition-colors">
-                        {{ s }}
-                      </button>
-                    }
-                  </div>
-
-                  @if (subjectSearch().trim()) {
-                    <button
-                      type="button"
-                      (click)="useTypedSubject()"
-                      class="w-full px-3 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors text-left">
-                      Use "{{ subjectSearch().trim() }}"
-                    </button>
-                  }
-                </div>
-              }
-            </div>
-
-            <div class="relative" #topicDropdownRef>
-              <label class="text-xs font-black text-slate-400 uppercase tracking-widest block mb-2">Suggested Topic</label>
-              <button
-                type="button"
-                (click)="toggleTopicDropdown()"
-                class="w-full p-4 pr-11 rounded-2xl bg-slate-50 border-2 border-slate-100 hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 text-left flex items-center justify-between gap-2 transition-all">
-                <span [class]="quizForm.value.topic ? 'text-slate-800 font-semibold' : 'text-slate-400 font-medium'">
-                  {{ quizForm.value.topic || 'Select or type a topic' }}
-                </span>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-slate-500 transition-transform" [class.rotate-180]="topicDropdownOpen()">
-                  <path d="M3 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-
-              @if (quizForm.value.topic) {
-                <button
-                  type="button"
-                  (click)="clearTopic($event)"
-                  class="absolute right-9 top-9.5 h-7 w-7 rounded-full bg-slate-200 text-slate-600 hover:bg-slate-300 hover:text-slate-800 transition-colors flex items-center justify-center z-10"
-                  aria-label="Clear selected topic">
-                  <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
-                    <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-                  </svg>
-                </button>
-              }
-
-              @if (topicDropdownOpen()) {
-                <div class="absolute z-20 mt-2 w-full bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/70 p-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <input
-                    type="text"
-                    [value]="topicSearch()"
-                    (input)="onTopicSearchInput($event)"
-                    placeholder="Search or type custom topic"
-                    class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm font-medium">
-
-                  <div class="max-h-44 overflow-y-auto space-y-1 pr-1">
-                    @for (t of filteredSuggestedTopics(); track t) {
-                      <button
-                        type="button"
-                        (click)="selectTopic(t)"
-                        [class]="quizForm.value.topic === t ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-transparent text-slate-700 hover:bg-slate-50'"
-                        class="w-full text-left px-3 py-2 rounded-xl border text-sm font-semibold transition-colors">
-                        {{ t }}
-                      </button>
-                    }
-                  </div>
-
-                  @if (topicSearch().trim()) {
-                    <button
-                      type="button"
-                      (click)="useTypedTopic()"
-                      class="w-full px-3 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors text-left">
-                      Use "{{ topicSearch().trim() }}"
-                    </button>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 text-xs">
-            @if (quizForm.value.subject) {
-              <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold border border-blue-200">
-                Subject: {{ quizForm.value.subject }}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          @for (mode of testModes; track mode.id) {
+            <button
+              type="button"
+              (click)="selectTestMode(mode.id)"
+              [ngClass]="selectedTestMode() === mode.id
+                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                : 'border-[var(--color-paper-alt)] hover:border-[var(--color-accent)]'"
+              class="p-4 rounded-2xl border-2 transition-all text-left">
+              <span class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--color-ink-soft)] mb-2">
+                <span class="text-base">{{ mode.icon }}</span>
+                {{ mode.shortLabel }}
               </span>
-            }
-            @if (quizForm.value.topic) {
-              <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
-                Topic: {{ quizForm.value.topic }}
+              <span class="block font-bold">{{ mode.label }}</span>
+              <span class="text-xs text-[var(--color-ink-soft)] mt-1 block">
+                @if (mode.id === 'learning') {
+                  Immediate feedback and step-by-step explanations.
+                } @else {
+                  Quiet simulation with results at the end.
+                }
               </span>
-            }
-          </div>
-
-          <!-- <div class="relative border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer">
-            <input type="file" (change)="onFileSelected($event)" accept=".pdf,.txt" class="absolute inset-0 opacity-0 cursor-pointer">
-            <div class="space-y-1">
-              <p class="text-sm font-bold text-slate-700">{{ fileName() || 'Upload PDF or Notes (Optional)' }}</p>
-              <p class="text-xs text-slate-400">AI will scan your file for quiz data</p>
-            </div>
-          </div> -->
-        </div>
-
-
-
-
-        <h2 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2">
-          <span class="bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">4</span>
-          Quiz Style
-        </h2>
-        
-        <div class="grid grid-cols-3 gap-2 mb-6">
-          @for (type of testTypes; track type) {
-            <button type="button" (click)="quizForm.patchValue({testType: type})"
-              [class]="quizForm.value.testType === type ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'"
-              class="py-3 rounded-xl text-xs font-black uppercase tracking-tight transition-all">
-              {{ type }}
             </button>
           }
         </div>
 
-        <div>
-          <label class="text-xs font-black text-slate-400 uppercase tracking-widest block mb-3">Questions: {{ quizForm.value.questionCount }}</label>
-          <div class="flex gap-4">
-            @for (count of questionCounts; track count) {
-              <button type="button" (click)="quizForm.patchValue({questionCount: count})"
-                [class]="quizForm.value.questionCount === count ? 'ring-2 ring-blue-600 bg-blue-50' : 'bg-slate-50'"
-                class="flex-1 py-3 rounded-xl font-bold transition-all">
-                {{ count }}
-              </button>
-            }
-          </div>
+        <div class="mt-5 rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] p-4 text-sm leading-relaxed text-[var(--color-ink-soft)]">
+          {{ testModeExplanation() }}
         </div>
-        
-        <!--TIMER-->
-        <div class="flex flex-col gap-3 mt-4">
-          <label class="flex items-center gap-1.5 mono text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-              <circle cx="6.5" cy="7" r="5" stroke="#94a3b8" stroke-width="1.2"/>
-              <path d="M6.5 4.5V7l1.5 1.5" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/>
-              <path d="M4.5 1.5h4" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-            Timer
-          </label>
+      </section>
 
-          <!-- Row 1: No Timer + Preset Dropdown -->
-          <div class="flex flex-wrap gap-2">
-
-            <!-- No Timer -->
-            <button
-              type="button"
-              (click)="quizForm.patchValue({timer: null})"
-              class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border-[1.5px] text-[13px] font-semibold transition-all duration-150"
-              [class]="quizForm.value.timer === null
-                ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-blue-200 hover:text-blue-600'">
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.4"/>
-                <path d="M4 4l5 5M9 4L4 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-              No Timer
+      <!-- LEVEL SECTION -->
+      <section class="bg-white p-6 rounded-[20px] border border-[var(--color-line)]">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2 font-display">
+          <span class="bg-[var(--color-ink)] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-mono">2</span>
+          Choose your level
+        </h2>
+        <div class="grid grid-cols-2 gap-3">
+          @for (lvl of allLevels; track lvl.id) {
+            <button (click)="selectLevel(lvl)"
+              [ngClass]="selectedLevel()?.id === lvl.id
+                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                : 'border-[var(--color-paper-alt)] hover:border-[var(--color-accent)]'"
+              class="p-4 rounded-2xl border-2 transition-all text-left">
+              <span class="block font-bold">{{ lvl.name }}</span>
+              <span class="text-xs text-[var(--color-ink-soft)]">{{ lvl.subLevels[0] }} to {{ lvl.subLevels[lvl.subLevels.length-1] }}</span>
             </button>
+          }
+        </div>
 
-            <!-- Preset Dropdown -->
-            <div class="relative" #dropdownRef>
-              <button
-                type="button"
-                (click)="toggleDropdown()"
-                class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border-[1.5px] text-[13px] font-semibold transition-all duration-150"
-                [class]="isPresetActive()
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-500/20'
-                  : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-blue-200 hover:text-blue-600'">
-                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <circle cx="6.5" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/>
-                  <path d="M6.5 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                  <path d="M4.5 1.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                </svg>
-                {{ activePresetLabel() }}
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
-                  class="transition-transform duration-200"
-                  [class.rotate-180]="dropdownOpen()">
-                  <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
+        @if (selectedLevel(); as active) {
+          <div class="mt-6 pt-6 border-t border-[var(--color-line)] animate-in fade-in slide-in-from-top-2">
+            <p class="text-xs font-bold text-[var(--color-ink-soft)] mb-3 uppercase tracking-widest">Select grade or year</p>
+            <div class="flex flex-wrap gap-2">
+              @for (sub of active.subLevels; track sub) {
+                <button (click)="setSubLevel(sub)"
+                  [ngClass]="selectedSubLevel() === sub
+                    ? 'bg-[var(--color-ink)] text-white'
+                    : 'bg-[var(--color-paper-alt)] text-[var(--color-ink-soft)] hover:bg-[var(--color-paper)]'"
+                  class="px-4 py-2 rounded-full text-sm font-bold transition-all">
+                  {{ sub }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </section>
 
-              <!-- Dropdown panel -->
-              <div
-                class="absolute left-0 top-full mt-1.5 w-36 bg-white border border-slate-200 rounded-xl shadow-lg shadow-slate-200/60 overflow-hidden z-20"
-                [class.pointer-events-none]="!dropdownOpen()"
-                [style.opacity]="dropdownOpen() ? '1' : '0'"
-                [style.transform]="dropdownOpen() ? 'translateY(0)' : 'translateY(-6px)'"
-                style="transition: opacity 150ms ease, transform 150ms ease;">
+      <!-- SOURCE AND TOPIC SECTION -->
+      @if (selectedSubLevel()) {
+        <section [formGroup]="quizForm" class="bg-white p-6 rounded-[20px] border border-[var(--color-line)] animate-in fade-in slide-in-from-bottom-4">
+          <h2 class="text-xl font-bold mb-4 flex items-center gap-2 font-display">
+            <span class="bg-[var(--color-ink)] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-mono">3</span>
+            Source and topic
+          </h2>
 
-                @for (preset of timerPresets; track preset.label) {
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="relative" #subjectDropdownRef>
+                <label class="text-xs font-bold text-[var(--color-ink-soft)] uppercase tracking-widest block mb-2">Subject</label>
+                <button
+                  type="button"
+                  (click)="toggleSubjectDropdown()"
+                  class="w-full p-4 pr-11 rounded-2xl bg-[var(--color-paper)] border-2 border-[var(--color-paper-alt)] hover:border-[var(--color-accent)] focus-visible:outline-none text-left flex items-center justify-between gap-2 transition-all">
+                  <span [ngClass]="quizForm.value.subject ? 'text-[var(--color-ink)] font-semibold' : 'text-[var(--color-ink-soft)] font-medium'">
+                    {{ quizForm.value.subject || 'Select or type a subject' }}
+                  </span>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-[var(--color-ink-soft)] transition-transform" [class.rotate-180]="subjectDropdownOpen()">
+                    <path d="M3 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                @if (quizForm.value.subject) {
                   <button
                     type="button"
-                    (click)="selectPreset(preset.seconds)"
-                    class="w-full flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold transition-colors duration-100"
-                    [class]="quizForm.value.timer === preset.seconds
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'">
-                    <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
-                      <circle cx="6.5" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/>
-                      <path d="M6.5 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                      <path d="M4.5 1.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                    (click)="clearSubject($event)"
+                    class="absolute right-9 top-9.5 h-7 w-7 rounded-full bg-[var(--color-paper-alt)] text-[var(--color-ink-soft)] hover:bg-[var(--color-line)] hover:text-[var(--color-ink)] transition-colors flex items-center justify-center z-10"
+                    aria-label="Clear selected subject">
+                    <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                      <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
                     </svg>
-                    {{ preset.label }}
-                    @if (quizForm.value.timer === preset.seconds) {
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" class="ml-auto">
-                        <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    }
                   </button>
                 }
 
+                @if (subjectDropdownOpen()) {
+                  <div class="absolute z-20 mt-2 w-full bg-white border border-[var(--color-line)] rounded-2xl p-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <input
+                      type="text"
+                      [value]="subjectSearch()"
+                      (input)="onSubjectSearchInput($event)"
+                      placeholder="Search or type custom subject"
+                      class="w-full px-3 py-2 rounded-xl bg-[var(--color-paper)] border border-[var(--color-paper-alt)] focus:border-[var(--color-accent)] outline-none text-sm font-medium">
+
+                    <div class="max-h-44 overflow-y-auto space-y-1 pr-1">
+                      @for (s of filteredSubjects(); track s) {
+                        <button
+                          type="button"
+                          (click)="selectSubject(s)"
+                          [ngClass]="quizForm.value.subject === s
+                            ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
+                            : 'bg-white border-transparent text-[var(--color-ink-soft)] hover:bg-[var(--color-paper)]'"
+                          class="w-full text-left px-3 py-2 rounded-xl border text-sm font-semibold transition-colors">
+                          {{ s }}
+                        </button>
+                      }
+                    </div>
+
+                    @if (subjectSearch().trim()) {
+                      <button
+                        type="button"
+                        (click)="useTypedSubject()"
+                        class="w-full px-3 py-2 rounded-xl bg-[var(--color-ink)] text-white text-sm font-semibold hover:opacity-90 transition-opacity text-left">
+                        Use "{{ subjectSearch().trim() }}"
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="relative" #topicDropdownRef>
+                <label class="text-xs font-bold text-[var(--color-ink-soft)] uppercase tracking-widest block mb-2">Suggested topic</label>
+                <button
+                  type="button"
+                  (click)="toggleTopicDropdown()"
+                  class="w-full p-4 pr-11 rounded-2xl bg-[var(--color-paper)] border-2 border-[var(--color-paper-alt)] hover:border-[var(--color-accent)] focus-visible:outline-none text-left flex items-center justify-between gap-2 transition-all">
+                  <span [ngClass]="quizForm.value.topic ? 'text-[var(--color-ink)] font-semibold' : 'text-[var(--color-ink-soft)] font-medium'">
+                    {{ quizForm.value.topic || 'Select or type a topic' }}
+                  </span>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-[var(--color-ink-soft)] transition-transform" [class.rotate-180]="topicDropdownOpen()">
+                    <path d="M3 5.5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                @if (quizForm.value.topic) {
+                  <button
+                    type="button"
+                    (click)="clearTopic($event)"
+                    class="absolute right-9 top-9.5 h-7 w-7 rounded-full bg-[var(--color-paper-alt)] text-[var(--color-ink-soft)] hover:bg-[var(--color-line)] hover:text-[var(--color-ink)] transition-colors flex items-center justify-center z-10"
+                    aria-label="Clear selected topic">
+                    <svg width="11" height="11" viewBox="0 0 13 13" fill="none">
+                      <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                }
+
+                @if (topicDropdownOpen()) {
+                  <div class="absolute z-20 mt-2 w-full bg-white border border-[var(--color-line)] rounded-2xl p-3 space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                    <input
+                      type="text"
+                      [value]="topicSearch()"
+                      (input)="onTopicSearchInput($event)"
+                      placeholder="Search or type custom topic"
+                      class="w-full px-3 py-2 rounded-xl bg-[var(--color-paper)] border border-[var(--color-paper-alt)] focus:border-[var(--color-accent)] outline-none text-sm font-medium">
+
+                    <div class="max-h-44 overflow-y-auto space-y-1 pr-1">
+                      @for (t of filteredSuggestedTopics(); track t) {
+                        <button
+                          type="button"
+                          (click)="selectTopic(t)"
+                          [ngClass]="quizForm.value.topic === t
+                            ? 'bg-[var(--color-exam-soft)] border-[var(--color-exam)] text-[var(--color-exam)]'
+                            : 'bg-white border-transparent text-[var(--color-ink-soft)] hover:bg-[var(--color-paper)]'"
+                          class="w-full text-left px-3 py-2 rounded-xl border text-sm font-semibold transition-colors">
+                          {{ t }}
+                        </button>
+                      }
+                    </div>
+
+                    @if (topicSearch().trim()) {
+                      <button
+                        type="button"
+                        (click)="useTypedTopic()"
+                        class="w-full px-3 py-2 rounded-xl bg-[var(--color-ink)] text-white text-sm font-semibold hover:opacity-90 transition-opacity text-left">
+                        Use "{{ topicSearch().trim() }}"
+                      </button>
+                    }
+                  </div>
+                }
               </div>
             </div>
 
+            @if (recentTopics().length) {
+              <div class="space-y-2">
+                <p class="text-xs font-bold text-[var(--color-ink-soft)] uppercase tracking-widest">Recent topics</p>
+                <div class="flex flex-wrap gap-2">
+                  @for (topic of recentTopics(); track topic) {
+                    <button
+                      type="button"
+                      (click)="selectRecentTopic(topic)"
+                      class="px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--color-paper)] border border-[var(--color-line)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+                      {{ topic }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="flex flex-wrap gap-2 text-xs">
+              @if (quizForm.value.subject) {
+                <span class="px-2.5 py-1 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] font-semibold border border-[var(--color-accent)]">
+                  Subject: {{ quizForm.value.subject }}
+                </span>
+              }
+              @if (quizForm.value.topic) {
+                <span class="px-2.5 py-1 rounded-full bg-[var(--color-exam-soft)] text-[var(--color-exam)] font-semibold border border-[var(--color-exam)]">
+                  Topic: {{ quizForm.value.topic }}
+                </span>
+              }
+            </div>
           </div>
 
-          <!-- Row 2: Custom timer input -->
-          <div class="flex items-center gap-2 p-3 bg-slate-50 border-[1.5px] rounded-xl transition-all duration-150"
-            [class]="isCustomTimerActive()
-              ? 'border-blue-500 ring-2 ring-blue-500/10'
-              : 'border-slate-200'">
+          <h2 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2 font-display">
+            <span class="bg-[var(--color-ink)] text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-mono">4</span>
+            Quiz style
+          </h2>
 
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-slate-400 shrink-0">
-              <circle cx="7" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/>
-              <path d="M7 5v3l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-              <path d="M5 1.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-
-            <input
-              type="number" min="0" #minutes placeholder="00"
-              class="mono w-10 bg-transparent text-sm font-bold text-center text-slate-700 outline-none placeholder:text-slate-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
-
-            <span class="mono text-sm font-bold text-slate-300">:</span>
-
-            <input
-              type="number" min="0" max="59" #seconds placeholder="00"
-              class="mono w-10 bg-transparent text-sm font-bold text-center text-slate-700 outline-none placeholder:text-slate-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
-
-            <span class="text-[11px] text-slate-400 flex-1">min : sec</span>
-
-            <button
-              type="button"
-              (click)="setCustomTimer(minutes.valueAsNumber || 0, seconds.valueAsNumber || 0)"
-              class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-[12px] font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Set
-            </button>
-
+          <div class="grid grid-cols-3 gap-2 mb-6">
+            @for (type of testTypes; track type) {
+              <button type="button" (click)="quizForm.patchValue({testType: type})"
+                [ngClass]="quizForm.value.testType === type
+                  ? 'bg-[var(--color-ink)] text-white'
+                  : 'bg-[var(--color-paper-alt)] text-[var(--color-ink-soft)]'"
+                class="py-3 rounded-xl text-xs font-bold uppercase tracking-tight transition-all">
+                {{ type }}
+              </button>
+            }
           </div>
 
-          <!-- Active timer display -->
-          @if (quizForm.value.timer !== null) {
-            <div class="flex items-center gap-2 px-3.5 py-2.5 bg-blue-50 border border-blue-100 rounded-xl">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7.5" r="5.5" stroke="#4f46e5" stroke-width="1.3"/>
-                <path d="M7 5v3l2 1" stroke="#4f46e5" stroke-width="1.3" stroke-linecap="round"/>
+          <div>
+            <label class="text-xs font-bold text-[var(--color-ink-soft)] uppercase tracking-widest block mb-3">Questions: {{ quizForm.value.questionCount }}</label>
+            <div class="flex gap-4">
+              @for (count of questionCounts; track count) {
+                <button type="button" (click)="quizForm.patchValue({questionCount: count})"
+                  [ngClass]="quizForm.value.questionCount === count
+                    ? 'ring-2 ring-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                    : 'bg-[var(--color-paper)]'"
+                  class="flex-1 py-3 rounded-xl font-bold font-mono transition-all">
+                  {{ count }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- TIMER -->
+          <div class="flex flex-col gap-3 mt-4">
+            <label class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-[var(--color-ink-soft)]">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <circle cx="6.5" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M6.5 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                <path d="M4.5 1.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
               </svg>
-              <span class="text-[13px] font-semibold text-blue-700">
-                Timer set to
-                <span class="mono font-bold">{{ formatTimer(quizForm.value.timer!) }}</span>
-              </span>
+              Timer
+            </label>
+
+            <div class="flex flex-wrap gap-2">
               <button
                 type="button"
                 (click)="quizForm.patchValue({timer: null})"
-                class="ml-auto text-blue-400 hover:text-blue-700 transition-colors">
+                class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border-[1.5px] text-[13px] font-semibold transition-all duration-150"
+                [ngClass]="quizForm.value.timer === null
+                  ? 'bg-[var(--color-ink)] border-[var(--color-ink)] text-white'
+                  : 'bg-[var(--color-paper)] border-[var(--color-paper-alt)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'">
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                  <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.4"/>
+                  <path d="M4 4l5 5M9 4L4 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
+                No timer
               </button>
+
+              <div class="relative" #dropdownRef>
+                <button
+                  type="button"
+                  (click)="toggleDropdown()"
+                  class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border-[1.5px] text-[13px] font-semibold transition-all duration-150"
+                  [ngClass]="isPresetActive()
+                    ? 'bg-[var(--color-ink)] border-[var(--color-ink)] text-white'
+                    : 'bg-[var(--color-paper)] border-[var(--color-paper-alt)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <circle cx="6.5" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/>
+                    <path d="M6.5 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                    <path d="M4.5 1.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                  {{ activePresetLabel() }}
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
+                    class="transition-transform duration-200"
+                    [class.rotate-180]="dropdownOpen()">
+                    <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+
+                <div
+                  class="absolute left-0 top-full mt-1.5 w-36 bg-white border border-[var(--color-line)] rounded-xl overflow-hidden z-20"
+                  [class.pointer-events-none]="!dropdownOpen()"
+                  [style.opacity]="dropdownOpen() ? '1' : '0'"
+                  [style.transform]="dropdownOpen() ? 'translateY(0)' : 'translateY(-6px)'"
+                  style="transition: opacity 150ms ease, transform 150ms ease;">
+
+                  @for (preset of timerPresets; track preset.label) {
+                    <button
+                      type="button"
+                      (click)="selectPreset(preset.seconds)"
+                      class="w-full flex items-center gap-2 px-3.5 py-2.5 text-[13px] font-semibold transition-colors duration-100"
+                      [ngClass]="quizForm.value.timer === preset.seconds
+                        ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                        : 'text-[var(--color-ink-soft)] hover:bg-[var(--color-paper)]'">
+                      <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+                        <circle cx="6.5" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/>
+                        <path d="M6.5 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                        <path d="M4.5 1.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                      </svg>
+                      {{ preset.label }}
+                      @if (quizForm.value.timer === preset.seconds) {
+                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" class="ml-auto">
+                          <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 p-3 bg-[var(--color-paper)] border-[1.5px] rounded-xl transition-all duration-150"
+              [ngClass]="isCustomTimerActive()
+                ? 'border-[var(--color-accent)]'
+                : 'border-[var(--color-paper-alt)]'">
+
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="text-[var(--color-ink-soft)] shrink-0">
+                <circle cx="7" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+                <path d="M7 5v3l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                <path d="M5 1.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+
+              <input
+                type="number" min="0" #minutes placeholder="00"
+                class="font-mono w-10 bg-transparent text-sm font-bold text-center outline-none placeholder:text-[var(--color-ink-soft)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
+
+              <span class="font-mono text-sm font-bold text-[var(--color-ink-soft)]">:</span>
+
+              <input
+                type="number" min="0" max="59" #seconds placeholder="00"
+                class="font-mono w-10 bg-transparent text-sm font-bold text-center outline-none placeholder:text-[var(--color-ink-soft)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"/>
+
+              <span class="text-[11px] text-[var(--color-ink-soft)] flex-1">min : sec</span>
+
+              <button
+                type="button"
+                (click)="setCustomTimer(minutes.valueAsNumber || 0, seconds.valueAsNumber || 0)"
+                class="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-ink)] text-white text-[12px] font-semibold rounded-lg hover:opacity-90 transition-opacity">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Set
+              </button>
+            </div>
+
+            @if (quizForm.value.timer !== null) {
+              <div class="flex items-center gap-2 px-3.5 py-2.5 bg-[var(--color-accent-soft)] border border-[var(--color-accent)] rounded-xl">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7.5" r="5.5" stroke="var(--color-accent)" stroke-width="1.3"/>
+                  <path d="M7 5v3l2 1" stroke="var(--color-accent)" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+                <span class="text-[13px] font-semibold text-[var(--color-accent)]">
+                  Timer set to
+                  <span class="font-mono font-bold">{{ formatTimer(quizForm.value.timer!) }}</span>
+                </span>
+                <button
+                  type="button"
+                  (click)="quizForm.patchValue({timer: null})"
+                  class="ml-auto text-[var(--color-accent)] hover:opacity-70 transition-opacity">
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                    <path d="M2 2l9 9M11 2L2 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+
+          <button
+            (click)="generateQuiz()"
+            [disabled]="isLoading() || !quizForm.valid"
+            class="w-full mt-8 bg-[var(--color-ink)] text-white py-5 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-3
+                  disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
+            [class.scale-95]="isLoading()">
+
+            @if (isLoading()) {
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Thinking through your quiz…</span>
+            } @else {
+              <span>Generate quiz</span>
+            }
+          </button>
+
+          @if (!signedInUser()) {
+            <div class="mt-3 flex items-center justify-between rounded-2xl border border-[var(--color-line)] bg-[var(--color-paper)] px-4 py-3 text-sm text-[var(--color-ink-soft)]">
+              <span class="font-semibold text-[var(--color-ink)]">Guest trial</span>
+              <span class="font-bold font-mono text-[var(--color-ink)]">{{ guestTrialStatus() }}</span>
             </div>
           }
 
-        </div>
-
-        <!--GENERATE BUTTON-->
-        <button 
-          (click)="generateQuiz()" 
-          [disabled]="isLoading() || !quizForm.valid"
-          class="w-full mt-8 bg-blue-600 text-white py-5 rounded-2xl font-black text-lg transition-all flex items-center justify-center gap-3
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale shadow-xl shadow-blue-100"
-          [class.scale-95]="isLoading()">
-          
-          @if (isLoading()) {
-            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span>AI IS BRAINSTORMING...</span>
-          } @else {
-            <span>GENERATE QUIZ</span>
+          @if (validationMessage() && !showFailedGenerationModal()) {
+            <p class="mt-3 text-sm font-semibold text-[var(--color-danger)]">{{ validationMessage() }}</p>
           }
-        </button>
-
-        @if (!signedInUser()) {
-          <div class="mt-3 flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            <span class="font-semibold text-slate-700">Guest trial</span>
-            <span class="font-black text-slate-900">{{ guestTrialStatus() }}</span>
-          </div>
-        }
-
-      @if (validationMessage() && !showFailedGenerationModal()) {
-        <p class="mt-3 text-sm font-semibold text-rose-600">{{ validationMessage() }}</p>
+        </section>
       }
-      </section>
+    </main>
+
+    <!-- Quiz ticket recap -->
+    @if (selectedLevel()) {
+      <aside class="lg:sticky lg:top-6 lg:w-80 lg:shrink-0">
+        <div class="ticket-panel rounded-t-[20px] border border-[var(--color-line)] bg-white p-5">
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-ink-soft)]">Your quiz ticket</p>
+          <div class="mt-3 space-y-2.5 text-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-ink-soft)]">Mode</span>
+              <span class="font-semibold">{{ selectedTestMode() === 'exam' ? 'Exam' : 'Practice' }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-ink-soft)]">Level</span>
+              <span class="font-semibold">{{ selectedLevel()?.name }}</span>
+            </div>
+            @if (selectedSubLevel()) {
+              <div class="flex items-center justify-between">
+                <span class="text-[var(--color-ink-soft)]">Grade</span>
+                <span class="font-semibold">{{ selectedSubLevel() }}</span>
+              </div>
+            }
+            @if (quizForm.value.subject) {
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-[var(--color-ink-soft)]">Subject</span>
+                <span class="truncate font-semibold text-[var(--color-accent)]">{{ quizForm.value.subject }}</span>
+              </div>
+            }
+            @if (quizForm.value.topic) {
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-[var(--color-ink-soft)]">Topic</span>
+                <span class="truncate font-semibold text-[var(--color-exam)]">{{ quizForm.value.topic }}</span>
+              </div>
+            }
+            @if (quizForm.value.testType) {
+              <div class="flex items-center justify-between">
+                <span class="text-[var(--color-ink-soft)]">Style</span>
+                <span class="font-semibold">{{ quizForm.value.testType }}</span>
+              </div>
+            }
+            <div class="flex items-center justify-between border-t border-dashed border-[var(--color-line)] pt-2.5">
+              <span class="text-[var(--color-ink-soft)]">Questions</span>
+              <span class="font-mono font-semibold">{{ quizForm.value.questionCount }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[var(--color-ink-soft)]">Timer</span>
+              <span class="font-mono font-semibold">{{ quizForm.value.timer !== null ? formatTimer(quizForm.value.timer!) : 'Untimed' }}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
     }
-  </main>
+  </div>
+</div>
 
-  <!-- SHOW MODAL OF FAILED GENERATION -->
-  @if (showFailedGenerationModal()) {
-
-  <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 animate-in fade-in duration-200">
-
-    <div class="bg-white p-6 rounded-2xl w-105 max-w-[90vw] shadow-xl animate-in zoom-in-95 slide-in-from-bottom-2 duration-200">
-
-      <h3 class="text-lg font-bold text-rose-600 mb-2">
-        ⚠ Generation Warning
-      </h3>
-
-      <p class="text-sm text-slate-600 mb-4">
-        {{ validationMessage() }}
-      </p>
-
-      <p class="text-xs text-slate-400 mb-6">
-        Quiz generation failed, Please come back later.
-      </p>
-
+<!-- FAILED GENERATION MODAL -->
+@if (showFailedGenerationModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel w-105 max-w-[90vw] p-6">
+      <h3 class="font-display text-lg font-bold text-[var(--color-danger)] mb-2">Generation warning</h3>
+      <p class="text-sm text-[var(--color-ink-soft)] mb-4">{{ validationMessage() }}</p>
+      <p class="text-xs text-[var(--color-ink-soft)] opacity-70 mb-6">Quiz generation failed. Please try again shortly.</p>
       <div class="flex justify-end gap-3">
-
         <button
           (click)="confirmFailedGeneration()"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]">
+          class="px-4 py-2 rounded-lg bg-[var(--color-ink)] text-white font-semibold transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]">
           Okay
         </button>
-
       </div>
-
     </div>
-
   </div>
-  }
+}
 
-  <!-- SHOW MODAL OF TOPIC WARNING -->
-  @if (showDifficultyModal()) {
-
-  <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-
-    <div class="bg-white p-6 rounded-2xl w-105 shadow-xl">
-
-      <h3 class="text-lg font-bold text-rose-600 mb-2">
-        ⚠ Topic Warning
-      </h3>
-
-      <p class="text-sm text-slate-600 mb-4">
-        {{ difficultyMessage() }}
-      </p>
-
-      <p class="text-xs text-slate-400 mb-6">
-        The AI detected this topic may not be appropriate for the selected level.
-      </p>
-
+<!-- TOPIC WARNING MODAL -->
+@if (showDifficultyModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel w-105 max-w-[90vw] p-6">
+      <h3 class="font-display text-lg font-bold text-[var(--color-danger)] mb-2">Topic warning</h3>
+      <p class="text-sm text-[var(--color-ink-soft)] mb-4">{{ difficultyMessage() }}</p>
+      <p class="text-xs text-[var(--color-ink-soft)] opacity-70 mb-6">The AI detected this topic may not be appropriate for the selected level.</p>
       <div class="flex justify-end gap-3">
-
         <button
           (click)="cancelDifficulty()"
-          class="px-4 py-2 rounded-lg bg-slate-200 font-semibold">
+          class="px-4 py-2 rounded-lg bg-[var(--color-paper-alt)] text-[var(--color-ink)] font-semibold">
           Cancel
         </button>
-
         <button
           (click)="confirmDifficulty()"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold">
-          Generate Anyway
+          class="px-4 py-2 rounded-lg bg-[var(--color-ink)] text-white font-semibold">
+          Generate anyway
         </button>
-
       </div>
-
     </div>
-
   </div>
-  }
+}
 
-  <!-- SHOW MODAL WHEN GUEST TRIAL IS USED -->
-  @if (showGuestLimitModal()) {
-
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 animate-in fade-in duration-200">
-
-    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl shadow-slate-900/20 border border-slate-200 animate-in zoom-in-95 slide-in-from-bottom-2 duration-200">
-
-      <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-        <span class="text-xl">🔒</span>
+<!-- GUEST LIMIT MODAL -->
+@if (showGuestLimitModal()) {
+  <div class="modal-backdrop">
+    <div class="modal-panel w-full max-w-md p-6">
+      <div class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--color-accent-soft)] text-[var(--color-accent)]">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <rect x="4" y="9" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M7 9V6a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
       </div>
 
-      <h3 class="text-lg font-bold text-slate-900 mb-2">
-        Guest limit reached
-      </h3>
-
-      <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+      <h3 class="font-display text-lg font-bold mb-2">Guest limit reached</h3>
+      <p class="text-sm text-[var(--color-ink-soft)] mb-4 leading-relaxed">
         You used all 3 guest trials. Register or log in to unlock your status and see your activity insights.
       </p>
 
-      <div class="mb-5 grid gap-2 text-sm text-slate-700">
-        <div class="rounded-2xl bg-slate-50 px-4 py-3">See your quiz history and current status</div>
-        <div class="rounded-2xl bg-slate-50 px-4 py-3">View simple analytics about your usual topics, test modes, and scores</div>
-        <div class="rounded-2xl bg-slate-50 px-4 py-3">Keep generating without limits and track progress over time</div>
+      <div class="mb-5 grid gap-2 text-sm">
+        <div class="rounded-2xl bg-[var(--color-paper)] px-4 py-3">See your quiz history and current status</div>
+        <div class="rounded-2xl bg-[var(--color-paper)] px-4 py-3">View simple analytics about your usual topics, test modes, and scores</div>
+        <div class="rounded-2xl bg-[var(--color-paper)] px-4 py-3">Keep generating without limits and track progress over time</div>
       </div>
 
-      <div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+      <div class="mb-5 rounded-2xl border border-[var(--color-accent)] bg-[var(--color-accent-soft)] px-4 py-3 text-sm text-[var(--color-accent)]">
         Trial status: {{ guestTrialStatus() }} · {{ guestTrialRemaining() }}
       </div>
 
@@ -626,21 +649,16 @@
         <button
           type="button"
           (click)="closeGuestLimitModal()"
-          class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition-colors">
+          class="px-4 py-2 rounded-lg bg-[var(--color-paper-alt)] text-[var(--color-ink)] font-semibold hover:opacity-90 transition-opacity">
           Later
         </button>
-
         <button
           type="button"
           (click)="openLoginRegisterModal()"
-          class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors">
-          Login / Register
+          class="px-4 py-2 rounded-lg bg-[var(--color-ink)] text-white font-semibold hover:opacity-90 transition-opacity">
+          Log in or register
         </button>
       </div>
-
     </div>
-
   </div>
-  }
-
-</div>
+}

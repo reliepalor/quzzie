@@ -1,0 +1,280 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:host {
+  --color-paper: #f5f3ee;
+  --color-paper-alt: #eae7de;
+  --color-ink: #1b1f1c;
+  --color-ink-soft: #5b6058;
+  --color-line: #dad5c8;
+  --color-accent: #2f6f5e;
+  --color-accent-soft: #e1ede7;
+  --color-exam: #b5642b;
+  --color-exam-soft: #f3e4d3;
+  --color-danger: #a63a34;
+  --color-danger-soft: #f4e1de;
+
+  display: block;
+  font-family: 'Inter', sans-serif;
+  color: var(--color-ink);
+}
+
+.font-display {
+  font-family: 'Fraunces', serif;
+  letter-spacing: -0.01em;
+}
+
+.font-mono {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.pre-gate-bg {
+  background: var(--color-paper);
+}
+
+.pre-gate-card {
+  background: #ffffff;
+  border: 1px solid var(--color-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.admit-tag {
+  position: absolute;
+  top: 16px;
+  right: -36px;
+  transform: rotate(45deg);
+  background: var(--color-ink);
+  color: #ffffff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 4px 42px;
+  z-index: 2;
+}
+
+@media (min-width: 768px) {
+  .study-pass-divider {
+    position: relative;
+    border-left: 2px dashed var(--color-line);
+    padding-left: 1.5rem;
+  }
+
+  .study-pass-divider::before,
+  .study-pass-divider::after {
+    content: '';
+    position: absolute;
+    left: -9px;
+    width: 16px;
+    height: 16px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+  }
+
+  .study-pass-divider::before {
+    top: -8px;
+  }
+
+  .study-pass-divider::after {
+    bottom: -8px;
+  }
+}
+
+.pre-gate-enter {
+  animation: rise-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pre-gate-exit {
+  animation: fall-out 0.28s ease forwards;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fall-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-10px) scale(0.98); }
+}
+
+.pre-gate-fact-card {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  padding: 1.25rem;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-ink);
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+}
+
+@keyframes fact-in-a {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fact-in-b {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pre-gate-fact-enter-a { animation: fact-in-a 0.25s ease; }
+.pre-gate-fact-enter-b { animation: fact-in-b 0.25s ease; }
+
+.pre-gate-pagination {
+  display: flex;
+  gap: 6px;
+  margin: 12px 0 20px;
+}
+
+.pre-gate-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: none;
+  background: var(--color-paper-alt);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pre-gate-dot.is-active {
+  background: var(--color-accent);
+  transform: scale(1.25);
+}
+
+/* Mascot */
+.pre-gate-mascot-wrap {
+  position: relative;
+  height: 150px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.pre-gate-book-stack {
+  position: absolute;
+  bottom: 0;
+  left: 12px;
+  width: 46px;
+  height: 34px;
+  background:
+    linear-gradient(var(--color-exam) 0 10px, transparent 10px) 0 0/100% 12px no-repeat,
+    linear-gradient(var(--color-accent) 0 10px, transparent 10px) 0 12px/100% 12px no-repeat,
+    linear-gradient(var(--color-ink) 0 10px, transparent 10px) 0 24px/100% 12px no-repeat;
+  border-radius: 4px;
+}
+
+.pre-gate-vial {
+  position: absolute;
+  bottom: 6px;
+  right: 16px;
+  width: 14px;
+  height: 30px;
+  background: var(--color-accent-soft);
+  border: 1.5px solid var(--color-accent);
+  border-radius: 7px 7px 3px 3px;
+}
+
+.pre-gate-robot {
+  position: relative;
+  width: 84px;
+  height: 100px;
+}
+
+.pre-gate-head {
+  position: relative;
+  width: 72px;
+  height: 60px;
+  margin: 0 auto;
+  background: var(--color-accent-soft);
+  border: 2px solid var(--color-ink);
+  border-radius: 20px;
+}
+
+.pre-gate-body {
+  width: 56px;
+  height: 34px;
+  margin: -4px auto 0;
+  background: var(--color-paper-alt);
+  border: 2px solid var(--color-ink);
+  border-radius: 0 0 16px 16px;
+}
+
+.pre-gate-leaf {
+  position: absolute;
+  top: -14px;
+  width: 10px;
+  height: 20px;
+  background: var(--color-accent);
+  border-radius: 60% 60% 60% 0;
+}
+
+.pre-gate-leaf-left { left: 18px; transform: rotate(-15deg); }
+.pre-gate-leaf-right { right: 18px; transform: rotate(15deg) scaleX(-1); }
+
+.pre-gate-eye {
+  position: absolute;
+  top: 24px;
+  width: 6px;
+  height: 6px;
+  background: var(--color-ink);
+  border-radius: 999px;
+}
+
+.pre-gate-eye-left { left: 24px; }
+.pre-gate-eye-right { right: 24px; }
+
+.pre-gate-blush {
+  position: absolute;
+  top: 32px;
+  width: 10px;
+  height: 6px;
+  background: var(--color-exam-soft);
+  border-radius: 999px;
+}
+
+.pre-gate-blush-left { left: 12px; }
+.pre-gate-blush-right { right: 12px; }
+
+.pre-gate-smile {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 8px;
+  border-bottom: 2px solid var(--color-ink);
+  border-radius: 0 0 12px 12px;
+}
+
+.landing-enter-wrap {
+  animation: fade-in 0.3s ease;
+}
+
+.landing-enter-card {
+  animation: rise-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pre-gate-enter, .pre-gate-exit, .pre-gate-fact-enter-a,
+  .pre-gate-fact-enter-b, .landing-enter-wrap, .landing-enter-card {
+    animation: none;
+  }
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

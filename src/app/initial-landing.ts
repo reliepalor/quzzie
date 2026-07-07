@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FirebaseAuthService } from './shared/services/firebase-auth.service';
@@ -9,7 +9,7 @@ import { GuestTrialService } from './shared/services/guest-trial.service';
   selector: 'app-initial-landing',
   imports: [NgIf, NgFor, FormsModule],
   templateUrl: './initial-landing.html',
-  styleUrl: './app.css'
+  styleUrl: './initial-landing.css'
 })
 export class InitialLanding {
   private router = inject(Router);
@@ -29,6 +29,16 @@ export class InitialLanding {
   protected authLoading = false;
   protected authError: string | null = null;
   private readonly auth = inject(FirebaseAuthService);
+  protected readonly showSignInPassword = signal(false);
+  protected readonly showRegisterPassword = signal(false);
+
+  protected toggleSignInPassword(): void {
+    this.showSignInPassword.update(v => !v);
+  }
+
+  protected toggleRegisterPassword(): void {
+    this.showRegisterPassword.update(v => !v);
+  }
   protected isSignedIn(): boolean {
     return Boolean(this.auth.user());
   }
@@ -49,11 +59,13 @@ export class InitialLanding {
     }
   }
 
-  protected readonly triviaFacts: string[] = [
-    'Quizzie turns your topic into quick quizzes.',
-    'Each run can feel a little different.',
-    'It is smart to verify key facts too.'
-  ];
+protected readonly triviaFacts: string[] = [
+  'Type a topic. Get a quiz in seconds.',
+  'Same topic, different quiz each time.',
+  'Check key facts yourself too.'
+];
+
+  
 
   constructor() {
     this.guestTrial.ensureGuestTrialInitialized();

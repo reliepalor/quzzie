@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Profile, QuizAttempt, QuizAttemptQuestionReview, SavedQuiz } from '../../shared/models/supabase';
@@ -7,6 +7,7 @@ import { FirebaseAuthService } from '../../shared/services/firebase-auth.service
 import { QuizDataService } from '../../shared/services/quiz-data.service';
 
 type AccountSection = 'history' | 'saved' | 'progress' | 'settings';
+type HistoryFilter = 'all' | 'learning' | 'exam';
 
 @Component({
   standalone: true,
@@ -30,6 +31,32 @@ export class AccountPage {
   protected readonly activityError = signal<string | null>(null);
   protected readonly signedInUser = computed(() => this.auth.user());
   protected readonly avatarUrl = computed(() => this.signedInUser()?.photoURL ?? null);
+
+  protected readonly historyFilter = signal<HistoryFilter>('all');
+  protected readonly historySearch = signal('');
+  protected readonly selectedAttempt = signal<QuizAttempt | null>(null);
+  protected readonly selectedSavedQuiz = signal<SavedQuiz | null>(null);
+
+  protected readonly isEditingName = signal(false);
+  protected readonly nameDraft = signal('');
+  protected readonly savingProfile = signal(false);
+
+  protected readonly filteredAttempts = computed(() => {
+    const attempts = this.quizAttempts();
+    const filter = this.historyFilter();
+    const search = this.historySearch().trim().toLowerCase();
+
+    return attempts.filter(attempt => {
+      const mode = this.getAttemptMode(attempt);
+      const matchesFilter = filter === 'all' || mode === filter;
+      const matchesSearch =
+        !search ||
+        attempt.topic.toLowerCase().includes(search) ||
+        attempt.subject.toLowerCase().includes(search);
+
+      return matchesFilter && matchesSearch;
+    });
+  });
 
   protected readonly analytics = computed(() => {
     const attempts = this.quizAttempts();
@@ -113,6 +140,12 @@ export class AccountPage {
     });
   }
 
+  @HostListener('document:keydown.escape')
+  protected onEscape(): void {
+    this.selectedAttempt.set(null);
+    this.selectedSavedQuiz.set(null);
+  }
+
   protected get displayName(): string {
     const profile = this.profile();
     const user = this.signedInUser();
@@ -138,6 +171,70 @@ export class AccountPage {
     this.activeSection.set(section);
   }
 
+  protected setHistoryFilter(filter: HistoryFilter): void {
+    this.historyFilter.set(filter);
+  }
+
+  protected onSearchInput(event: Event): void {
+    this.historySearch.set((event.target as HTMLInputElement).value);
+  }
+
+  protected openAttempt(attempt: QuizAttempt): void {
+    this.selectedAttempt.set(attempt);
+  }
+
+  protected closeAttemptModal(): void {
+    this.selectedAttempt.set(null);
+  }
+
+  protected openSavedQuiz(savedQuiz: SavedQuiz): void {
+    this.selectedSavedQuiz.set(savedQuiz);
+  }
+
+  protected closeSavedQuizModal(): void {
+    this.selectedSavedQuiz.set(null);
+  }
+
+  protected startEditName(): void {
+    this.nameDraft.set(this.displayName);
+    this.isEditingName.set(true);
+  }
+
+  protected cancelEditName(): void {
+    this.isEditingName.set(false);
+  }
+
+  protected onNameDraftInput(event: Event): void {
+    this.nameDraft.set((event.target as HTMLInputElement).value);
+  }
+
+  protected async saveDisplayName(): Promise<void> {
+    const user = this.signedInUser();
+    const draft = this.nameDraft().trim();
+
+    if (!user || !draft) {
+      return;
+    }
+
+    this.savingProfile.set(true);
+
+    try {
+      const updated = await this.data.upsertProfile({
+        user_id: user.uid,
+        display_name: draft,
+        avatar_url: this.profile()?.avatar_url ?? user.photoURL ?? null,
+        created_at: this.profile()?.created_at ?? user.metadata.creationTime ?? new Date().toISOString(),
+      });
+
+      this.profile.set(updated);
+      this.isEditingName.set(false);
+    } catch (error) {
+      console.error('Failed to update display name', error);
+    } finally {
+      this.savingProfile.set(false);
+    }
+  }
+
   protected async signOut(): Promise<void> {
     await this.auth.signOut();
     void this.router.navigateByUrl('/');
@@ -149,6 +246,17 @@ export class AccountPage {
     }
 
     return Math.round((attempt.score / attempt.total_questions) * 100);
+  }
+
+  protected formatDuration(seconds: number | null): string {
+    if (!seconds && seconds !== 0) {
+      return 'Untimed';
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const remaining = seconds % 60;
+
+    return `${minutes}:${remaining.toString().padStart(2, '0')}`;
   }
 
   protected getAttemptMode(attempt: QuizAttempt): 'learning' | 'exam' {
@@ -208,18 +316,6 @@ export class AccountPage {
       this.profileLoading.set(false);
       this.activityLoading.set(false);
     }
-  }
-
-  private getTopLabel(items: Map<string, number>): string | null {
-    let winner: { label: string; count: number } | null = null;
-
-    for (const [label, count] of items.entries()) {
-      if (!winner || count > winner.count) {
-        winner = { label, count };
-      }
-    }
-
-    return winner?.label ?? null;
   }
 
   private getReviewQuestions(attempt: QuizAttempt): QuizAttemptQuestionReview[] {
